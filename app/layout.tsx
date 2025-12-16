@@ -12,6 +12,10 @@ const plusJakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "Adrian Wrapped 2025",
   description: "Developer journey wrapped",
+  icons: {
+    icon: "/public/CodingNGamer.webp",
+    apple: "/public/CodingNGamer.webp",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
