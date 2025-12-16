@@ -13,8 +13,8 @@ export const metadata: Metadata = {
   title: "Adrian Wrapped 2025",
   description: "Developer journey wrapped",
   icons: {
-    icon: "/public/CodingNGamer.webp",
-    apple: "/public/CodingNGamer.webp",
+    icon: "/CodingNGamer.webp", // Hapus "/public"
+    apple: "/CodingNGamer.webp", // Hapus "/public"
   },
 };
 
