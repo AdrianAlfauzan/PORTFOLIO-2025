@@ -3,43 +3,55 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Sparkles, Command } from "lucide-react";
+import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 
 const navItems = [
-  { label: "Home", href: "#home" },
-  { label: "Top Topics", href: "#top-topics" },
-  { label: "Obsession", href: "#obsession" },
-  { label: "Projects", href: "#projects" },
-  { label: "Monthly", href: "#monthly" },
-  { label: "Most Unexpected Question", href: "#unexpected-question" },
-  { label: "Signature", href: "#signature-style" },
-  { label: "Achievements", href: "#achievements" },
+  { label: "Home", id: "home" },
+  { label: "Top Topics", id: "top-topics" },
+  { label: "Obsession", id: "obsession" },
+  { label: "Projects", id: "projects" },
+  { label: "Monthly", id: "monthly" },
+  { label: "Most Unexpected Question", id: "unexpected-question" },
+  { label: "Signature", id: "signature-style" },
+  { label: "Achievements", id: "achievements" },
 ];
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const { scrollToElement } = useSmoothScroll();
+
+  const handleNavClick = (sectionId: string) => {
+    scrollToElement(sectionId);
+    setOpen(false);
+  };
 
   return (
     <>
       {/* ===== NAVBAR ===== */}
-      <motion.nav initial={{ y: -80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.6 }} className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/60 border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-center md:justify-between items-center">
+      <motion.nav initial={{ y: -80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.6 }} className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-gradient-to-b from-gray-900/70 via-black/50 to-transparent ">
+        <div className="max-w-7xl mx-auto px-6 py-3 flex justify-center md:justify-between items-center">
           {/* TITLE CENTER */}
-          <span className="font-bold text-lg tracking-wide text-white md:text-xl">🎧 Adrian Wrapped</span>
+          <motion.div whileHover={{ scale: 1.02 }} className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500/10 to-blue-500/10 border border-white/5">
+            <span className="font-bold tracking-wide text-white md:text-lg">Adrian Musa Alfauzan - 2025 </span>
+          </motion.div>
 
           {/* DESKTOP MENU */}
-          <ul className="hidden md:flex gap-6 text-sm text-zinc-300">
+          <ul className="hidden md:flex gap-2 text-sm">
             {navItems.map((item) => (
-              <li key={item.href}>
-                <a href={item.href} className="hover:text-[#1DB954] transition-colors">
+              <motion.li key={item.id} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <button
+                  onClick={() => handleNavClick(item.id)}
+                  className="text-zinc-300 hover:text-white transition-colors cursor-pointer px-4 py-2 rounded-xl hover:bg-gradient-to-r hover:from-emerald-500/10 hover:to-blue-500/10 hover:border hover:border-white/5"
+                >
                   {item.label}
-                </a>
-              </li>
+                </button>
+              </motion.li>
             ))}
           </ul>
         </div>
       </motion.nav>
 
-      {/* ===== HAMBURGER BUTTON MOBILE (FIXED) ===== */}
+      {/* ===== HAMBURGER BUTTON MOBILE ===== */}
       <button onClick={() => setOpen(!open)} className="md:hidden fixed left-0 top-1/2 -translate-y-1/2 z-50 group">
         <div className="relative">
           {/* Background pill yang separo keluar */}
@@ -92,10 +104,10 @@ export default function Navbar() {
             >
               <ul className="flex flex-col items-center gap-5 text-lg font-medium">
                 {navItems.map((item, i) => (
-                  <motion.li key={item.href} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                    <a href={item.href} onClick={() => setOpen(false)} className="text-white hover:text-[#1DB954] transition">
+                  <motion.li key={item.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+                    <button onClick={() => handleNavClick(item.id)} className="text-white hover:text-[#1DB954] transition cursor-pointer">
                       {item.label}
-                    </a>
+                    </button>
                   </motion.li>
                 ))}
               </ul>

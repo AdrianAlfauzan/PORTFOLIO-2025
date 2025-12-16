@@ -8,10 +8,14 @@ import UnexpectedQuestionSection from "@/components/sections/UnexpectedQuestionS
 import SignatureStyleSection from "@/components/sections/SignatureStyleSection";
 import MonthlyRecapSection from "@/components/sections/MonthlyRecapSection";
 import AchievementSection from "@/components/sections/AchievementSection";
+import WelcomeModal from "@/components/WelcomeModal";
+import AnnouncementAlert from "@/components/AnnouncementAlert";
 
 export default function Home() {
   return (
     <main className="relative overflow-x-hidden bg-gradient-to-b from-black via-zinc-900 to-black">
+      <WelcomeModal />
+      <AnnouncementAlert />
       <section id="home">
         <HeroSection />
       </section>

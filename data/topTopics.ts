@@ -1,27 +1,23 @@
 export const topTopics = [
-{
-title: "Next.js + Firebase Auth",
-emoji: "🔥",
-description: "Login guards, middleware, auth flow drama",
-},
-{
-title: "Expo & React Native",
-emoji: "📱",
-description: "Hooks everywhere, clean architecture",
-},
-{
-title: "Firestore & Storage",
-emoji: "🗂️",
-description: "Keranjang → Ajukan → Pemesanan",
-},
-{
-title: "WebSocket & Chat",
-emoji: "💬",
-description: "WhatsApp Web–level expectations",
-},
-{
-title: "Final Project",
-emoji: "🎓",
-description: "Proposal, metode, revisi tanpa akhir",
-},
+  {
+    title: "Next.js + Firebase Auth",
+
+    description: "Login guards, middleware, auth flow drama",
+  },
+  {
+    title: "Expo & React Native",
+    description: "Hooks everywhere, clean architecture",
+  },
+  {
+    title: "Firestore & Storage",
+    description: "Keranjang → Ajukan → Pemesanan di BKMG",
+  },
+  {
+    title: "WebSocket & Chat",
+    description: "WhatsApp Web level expectations",
+  },
+  {
+    title: "Final Project",
+    description: "Proposal, pitching, deployment, presentation",
+  },
 ];
