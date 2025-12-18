@@ -2,49 +2,65 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Sparkles, Command, ArrowLeft, ChevronDown, Home, Star, Target, FolderKanban, Calendar, HelpCircle, PenTool, Trophy, Database } from "lucide-react";
+import { Sparkles, Command, ArrowLeft, ChevronDown, Home, Star, Target, FolderKanban, Calendar, HelpCircle, PenTool, Trophy, Database, User, MessageSquare, Users, Heart } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
+import { PAGES, SECTION_IDS } from "@/lib/constants";
 
-// Menu dengan 3 kategori
+// Menu dengan kategori Community
 const menuCategories = [
   {
     name: "Core",
     icon: Home,
     items: [
-      { label: "Home", id: "hero", icon: Home },
-      { label: "Top Topics", id: "top-topics", icon: Star },
-      { label: "Obsession", id: "obsession", icon: Target },
+      { label: "Home", id: SECTION_IDS.HERO, icon: Home },
+      { label: "Top Topics", id: SECTION_IDS.TOP_TOPICS, icon: Star },
+      { label: "Obsession", id: SECTION_IDS.OBSESSION, icon: Target },
     ],
   },
   {
     name: "Work",
     icon: FolderKanban,
     items: [
-      { label: "Projects", id: "projects", icon: FolderKanban },
-      { label: "CRUD Demo", id: "crud", icon: Database },
+      { label: "Projects", id: SECTION_IDS.PROJECTS, icon: FolderKanban },
+      { label: "CRUD Demo", id: SECTION_IDS.CRUD, icon: Database },
     ],
   },
   {
     name: "Insights",
     icon: PenTool,
     items: [
-      { label: "Monthly", id: "monthly", icon: Calendar },
-      { label: "Most Unexpected", id: "unexpected-question", icon: HelpCircle },
-      { label: "Signature", id: "signature-style", icon: PenTool },
-      { label: "Achievements", id: "achievements", icon: Trophy },
+      { label: "Monthly", id: SECTION_IDS.MONTHLY, icon: Calendar },
+      { label: "Most Unexpected", id: SECTION_IDS.UNEXPECTED_QUESTION, icon: HelpCircle },
+      { label: "Signature", id: SECTION_IDS.SIGNATURE_STYLE, icon: PenTool },
+      { label: "Achievements", id: SECTION_IDS.ACHIEVEMENTS, icon: Trophy },
+    ],
+  },
+  {
+    name: "Community",
+    icon: Users,
+    items: [
+      { label: "Guestbook", id: SECTION_IDS.GUESTBOOK, icon: MessageSquare },
+      { label: "Testimonials", id: "testimonials", icon: Heart }, // Future feature
     ],
   },
 ];
 
+// Helper function untuk menentukan page type
+const getPageType = (pathname: string) => {
+  if (pathname === PAGES.CRUD) return "crud";
+  if (pathname === PAGES.GUESTBOOK) return "guestbook";
+  return "home";
+};
+
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const [isCrudPage, setIsCrudPage] = useState(false);
+  const [currentPage, setCurrentPage] = useState<"home" | "crud" | "guestbook">("home");
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    setIsCrudPage(pathname === "/crud");
+    setCurrentPage(getPageType(pathname));
   }, [pathname]);
 
   // Smart navigation handler
@@ -53,42 +69,77 @@ export default function Navbar() {
     setOpen(false);
     setActiveDropdown(null);
 
-    // 1. CRUD Demo navigation
-    if (sectionId === "crud") {
-      if (isCrudPage) {
-        // Already on CRUD page, scroll to top
+    // Handle special pages (CRUD, Guestbook)
+    if (sectionId === SECTION_IDS.CRUD || sectionId === SECTION_IDS.GUESTBOOK) {
+      const targetPage = sectionId === SECTION_IDS.CRUD ? PAGES.CRUD : PAGES.GUESTBOOK;
+
+      if (pathname === targetPage) {
+        // Already on the page, scroll to top
         window.scrollTo({ top: 0, behavior: "smooth" });
       } else {
-        // Navigate to CRUD page
-        router.push("/crud");
+        // Navigate to the page
+        router.push(targetPage);
       }
       return;
     }
 
-    // 2. On CRUD page, clicking other items
-    if (isCrudPage) {
-      // Navigate back to home with hash
-      router.push(`/#${sectionId}`);
+    // On special pages, clicking home items should go back to home
+    if (currentPage !== "home") {
+      router.push(`${PAGES.HOME}#${sectionId}`);
       return;
     }
 
-    // 3. On Homepage, handle smooth scroll
+    // On Homepage, handle smooth scroll
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
     } else {
-      if (pathname !== "/") {
-        router.push(`/#${sectionId}`);
-      } else {
-        console.warn(`Element with ID "${sectionId}" not found`);
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
+      console.warn(`Element with ID "${sectionId}" not found`);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   const handleBackToHome = () => {
-    router.push("/");
+    router.push(PAGES.HOME);
   };
+
+  // Get page-specific styling
+  const getPageStyle = () => {
+    switch (currentPage) {
+      case "crud":
+        return {
+          bgGradient: "from-purple-500/10 to-pink-500/10",
+          borderColor: "border-purple-500/20",
+          textColor: "text-purple-300",
+          ctaGradient: "from-purple-500 to-pink-600",
+          ctaHover: "hover:from-purple-600 hover:to-pink-700",
+          iconColor: "text-purple-300",
+          indicatorColor: "bg-purple-400",
+        };
+      case "guestbook":
+        return {
+          bgGradient: "from-blue-500/10 to-cyan-500/10",
+          borderColor: "border-blue-500/20",
+          textColor: "text-blue-300",
+          ctaGradient: "from-blue-500 to-cyan-600",
+          ctaHover: "hover:from-blue-600 hover:to-cyan-700",
+          iconColor: "text-blue-300",
+          indicatorColor: "bg-blue-400",
+        };
+      default: // home
+        return {
+          bgGradient: "from-emerald-500/10 to-blue-500/10",
+          borderColor: "border-white/5",
+          textColor: "text-white",
+          ctaGradient: "from-purple-500 to-pink-600",
+          ctaHover: "hover:from-purple-600 hover:to-pink-700",
+          iconColor: "text-[#1DB954]",
+          indicatorColor: "bg-[#1DB954]",
+        };
+    }
+  };
+
+  const pageStyle = getPageStyle();
 
   return (
     <>
@@ -97,7 +148,7 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           {/* LEFT: Logo/Title */}
           <div className="flex items-center gap-4">
-            {isCrudPage && (
+            {currentPage !== "home" && (
               <motion.button
                 whileHover={{ scale: 1.05, x: -3 }}
                 whileTap={{ scale: 0.95 }}
@@ -105,15 +156,29 @@ export default function Navbar() {
                 className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500/10 to-blue-500/10 border border-white/5 text-emerald-300 hover:text-white hover:border-emerald-400/30 transition-all"
               >
                 <ArrowLeft size={18} />
-                Back
+                Back to Home
               </motion.button>
             )}
 
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className={`px-5 py-2.5 rounded-xl bg-gradient-to-r border ${isCrudPage ? "from-purple-500/10 to-pink-500/10 border-purple-500/20" : "from-emerald-500/10 to-blue-500/10 border-white/5"}`}
-            >
-              <span className="font-bold tracking-wide text-white text-lg">{isCrudPage ? "🚀 CRUD" : "Adrian M. A."}</span>
+            <motion.div whileHover={{ scale: 1.02 }} className={`px-5 py-2.5 rounded-xl bg-gradient-to-r border ${pageStyle.bgGradient} ${pageStyle.borderColor}`}>
+              <span className="font-bold tracking-wide text-white text-lg">
+                {currentPage === "crud" ? (
+                  <>
+                    <Database size={18} className="inline mr-2 align-middle" />
+                    CRUD Dashboard
+                  </>
+                ) : currentPage === "guestbook" ? (
+                  <>
+                    <MessageSquare size={18} className="inline mr-2 align-middle" />
+                    Guestbook
+                  </>
+                ) : (
+                  <>
+                    <User size={18} className="inline mr-2 align-middle" />
+                    Adrian M. A.
+                  </>
+                )}
+              </span>
             </motion.div>
           </div>
 
@@ -125,7 +190,9 @@ export default function Navbar() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all ${
-                    activeDropdown === category.name || category.items.some((item) => item.id === "crud" && isCrudPage) ? "bg-white/10 text-white" : "text-zinc-300 hover:text-white hover:bg-white/5"
+                    activeDropdown === category.name || category.items.some((item) => (item.id === SECTION_IDS.CRUD && currentPage === "crud") || (item.id === SECTION_IDS.GUESTBOOK && currentPage === "guestbook"))
+                      ? "bg-white/10 text-white"
+                      : "text-zinc-300 hover:text-white hover:bg-white/5"
                   }`}
                 >
                   <category.icon size={18} />
@@ -146,16 +213,20 @@ export default function Navbar() {
                       <div className="p-2">
                         {category.items.map((item) => {
                           const ItemIcon = item.icon;
+                          const isActive = (item.id === SECTION_IDS.CRUD && currentPage === "crud") || (item.id === SECTION_IDS.GUESTBOOK && currentPage === "guestbook");
+
                           return (
                             <motion.button
                               key={item.id}
                               whileHover={{ x: 5 }}
                               onClick={() => handleNavClick(item.id)}
-                              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${item.id === "crud" && isCrudPage ? "bg-purple-500/20 text-purple-300" : "text-zinc-300 hover:bg-white/10 hover:text-white"}`}
+                              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                                isActive ? `bg-gradient-to-r ${pageStyle.bgGradient} ${pageStyle.textColor}` : "text-zinc-300 hover:bg-white/10 hover:text-white"
+                              }`}
                             >
                               <ItemIcon size={16} />
                               <span className="text-sm">{item.label}</span>
-                              {item.id === "crud" && isCrudPage && <span className="ml-auto w-2 h-2 bg-purple-400 rounded-full animate-pulse" />}
+                              {isActive && <span className={`ml-auto w-2 h-2 ${pageStyle.indicatorColor} rounded-full animate-pulse`} />}
                             </motion.button>
                           );
                         })}
@@ -172,12 +243,28 @@ export default function Navbar() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => handleNavClick(isCrudPage ? "hero" : "crud")}
-              className={`px-5 py-2.5 rounded-xl font-medium transition-all ${
-                isCrudPage ? "bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white" : "bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white"
+              onClick={() => {
+                if (currentPage === "home") {
+                  handleNavClick(SECTION_IDS.CRUD);
+                } else {
+                  handleBackToHome();
+                }
+              }}
+              className={`px-5 py-2.5 rounded-xl font-medium transition-all flex items-center ${
+                currentPage === "home" ? `bg-gradient-to-r ${pageStyle.ctaGradient} ${pageStyle.ctaHover} text-white` : "bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white"
               }`}
             >
-              {isCrudPage ? "🏠 View Portfolio" : "🚀 CRUD Demo"}
+              {currentPage === "home" ? (
+                <>
+                  <Database size={16} className="mr-2" />
+                  CRUD Demo
+                </>
+              ) : (
+                <>
+                  <Home size={16} className="mr-2" />
+                  View Portfolio
+                </>
+              )}
             </motion.button>
           </div>
         </div>
@@ -192,7 +279,7 @@ export default function Navbar() {
           {/* Icon container */}
           <div
             className={`relative z-10 ml-0 w-10 h-10 rounded-full backdrop-blur-lg border flex items-center justify-center group-hover:border-white/20 transition-all ${
-              isCrudPage ? "bg-purple-500/40 border-purple-500/30" : "bg-yellow/40 border-white/10"
+              currentPage !== "home" ? `${pageStyle.bgGradient.split(" ")[0]?.replace("/10", "/40")} ${pageStyle.borderColor}` : "bg-yellow/40 border-white/10"
             }`}
           >
             <motion.div
@@ -216,11 +303,11 @@ export default function Navbar() {
               transition={{ duration: 0.3 }}
               className="absolute"
             >
-              <Sparkles size={20} className={isCrudPage ? "text-purple-300" : "text-[#1DB954]"} />
+              <Sparkles size={20} className={currentPage !== "home" ? pageStyle.iconColor : "text-[#1DB954]"} />
             </motion.div>
 
             {/* Dot indicator */}
-            {!open && <span className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full animate-pulse ring-2 ring-black ${isCrudPage ? "bg-purple-400" : "bg-[#1DB954]"}`} />}
+            {!open && <span className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full animate-pulse ring-2 ring-black ${pageStyle.indicatorColor}`} />}
           </div>
         </div>
       </button>
@@ -238,8 +325,8 @@ export default function Navbar() {
               transition={{ type: "spring", stiffness: 120, damping: 18 }}
               className="fixed bottom-6 left-4 right-4 z-50 rounded-3xl bg-zinc-900/95 backdrop-blur-xl border border-white/10 p-6 max-h-[70vh] overflow-y-auto"
             >
-              {/* Back Button untuk CRUD page */}
-              {isCrudPage && (
+              {/* Back Button untuk non-home pages */}
+              {currentPage !== "home" && (
                 <motion.button
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -262,6 +349,8 @@ export default function Navbar() {
                     <div className="space-y-1">
                       {category.items.map((item, i) => {
                         const ItemIcon = item.icon;
+                        const isActive = (item.id === SECTION_IDS.CRUD && currentPage === "crud") || (item.id === SECTION_IDS.GUESTBOOK && currentPage === "guestbook");
+
                         return (
                           <motion.button
                             key={item.id}
@@ -269,11 +358,11 @@ export default function Navbar() {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: i * 0.03 }}
                             onClick={() => handleNavClick(item.id)}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${item.id === "crud" && isCrudPage ? "bg-purple-500/20 text-purple-300" : "text-white hover:bg-white/10"}`}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? `bg-gradient-to-r ${pageStyle.bgGradient} ${pageStyle.textColor}` : "text-white hover:bg-white/10"}`}
                           >
                             <ItemIcon size={18} />
                             <span className="text-base">{item.label}</span>
-                            {item.id === "crud" && isCrudPage && <span className="ml-auto w-2 h-2 bg-purple-400 rounded-full animate-pulse" />}
+                            {isActive && <span className={`ml-auto w-2 h-2 ${pageStyle.indicatorColor} rounded-full animate-pulse`} />}
                           </motion.button>
                         );
                       })}
@@ -287,10 +376,28 @@ export default function Navbar() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                onClick={() => handleNavClick(isCrudPage ? "hero" : "crud")}
-                className={`w-full mt-6 px-5 py-3 rounded-xl font-medium transition-all ${isCrudPage ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white" : "bg-gradient-to-r from-purple-500 to-pink-600 text-white"}`}
+                onClick={() => {
+                  if (currentPage === "home") {
+                    handleNavClick(SECTION_IDS.CRUD);
+                  } else {
+                    handleBackToHome();
+                  }
+                }}
+                className={`w-full mt-6 px-5 py-3 rounded-xl font-medium transition-all flex items-center justify-center ${
+                  currentPage === "home" ? `bg-gradient-to-r ${pageStyle.ctaGradient} text-white` : "bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
+                }`}
               >
-                {isCrudPage ? "🏠 View Portfolio" : "🚀 Try CRUD Demo"}
+                {currentPage === "home" ? (
+                  <>
+                    <Database size={18} className="mr-2" />
+                    Try CRUD Demo
+                  </>
+                ) : (
+                  <>
+                    <Home size={18} className="mr-2" />
+                    View Portfolio
+                  </>
+                )}
               </motion.button>
             </motion.div>
           </>
