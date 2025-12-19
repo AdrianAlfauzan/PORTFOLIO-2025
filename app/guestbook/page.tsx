@@ -2,34 +2,7 @@
 
 import { useState, useEffect, useCallback, FormEvent, ChangeEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  MessageSquare,
-  Heart,
-  ThumbsUp,
-  ThumbsDown,
-  Star,
-  Sparkles,
-  Send,
-  X,
-  Check,
-  Eye,
-  EyeOff,
-  Globe,
-  Briefcase,
-  Zap,
-  Users,
-  Lock,
-  Edit,
-  ChevronLeft,
-  ChevronRight,
-  AlertCircle,
-  Trophy,
-  Crown,
-  Award,
-  Target,
-  Flame,
-  Zap as Lightning,
-} from "lucide-react";
+import { MessageSquare, Heart, ThumbsUp, ThumbsDown, Star, Sparkles, Send, X, Check, Eye, EyeOff, Globe, Briefcase, Zap, Users, Lock, Edit, ChevronLeft, ChevronRight, AlertCircle, Trophy, Crown, Award, Flame } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import type { PostgrestError } from "@supabase/supabase-js";
@@ -210,6 +183,32 @@ export default function GuestbookPage() {
     });
   }, []);
 
+  
+
+  // Function to find champion comment
+  const findChampionComment = useCallback((commentsData: GuestbookComment[]) => {
+    if (commentsData.length === 0) {
+      setChampionComment(null);
+      setChampionReactionTotal(0);
+      return;
+    }
+
+    let champion: GuestbookComment | null = null;
+    let highestPositiveReactions = 0;
+
+    commentsData.forEach((comment) => {
+      const positiveReactions = calculatePositiveReactions(comment.reactions);
+
+      if (positiveReactions > highestPositiveReactions) {
+        highestPositiveReactions = positiveReactions;
+        champion = comment;
+      }
+    });
+
+    setChampionComment(champion);
+    setChampionReactionTotal(highestPositiveReactions);
+  }, []);
+
   const fetchComments = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -243,31 +242,7 @@ export default function GuestbookPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [calculateStats]);
-
-  // Function to find champion comment
-  const findChampionComment = useCallback((commentsData: GuestbookComment[]) => {
-    if (commentsData.length === 0) {
-      setChampionComment(null);
-      setChampionReactionTotal(0);
-      return;
-    }
-
-    let champion: GuestbookComment | null = null;
-    let highestPositiveReactions = 0;
-
-    commentsData.forEach((comment) => {
-      const positiveReactions = calculatePositiveReactions(comment.reactions);
-
-      if (positiveReactions > highestPositiveReactions) {
-        highestPositiveReactions = positiveReactions;
-        champion = comment;
-      }
-    });
-
-    setChampionComment(champion);
-    setChampionReactionTotal(highestPositiveReactions);
-  }, []);
+  }, [calculateStats , findChampionComment]);
 
   useEffect(() => {
     fetchComments();
