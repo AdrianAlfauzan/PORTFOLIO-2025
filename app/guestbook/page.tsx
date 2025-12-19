@@ -2,13 +2,49 @@
 
 import { useState, useEffect, useCallback, FormEvent, ChangeEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, Heart, ThumbsUp, ThumbsDown, Star, Sparkles, Send, X, Check, Eye, EyeOff, Globe, Briefcase, Zap, Users, Lock, Edit, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
+import {
+  MessageSquare,
+  Heart,
+  ThumbsUp,
+  ThumbsDown,
+  Star,
+  Sparkles,
+  Send,
+  X,
+  Check,
+  Eye,
+  EyeOff,
+  Globe,
+  Briefcase,
+  Zap,
+  Users,
+  Lock,
+  Edit,
+  ChevronLeft,
+  ChevronRight,
+  AlertCircle,
+  Trophy,
+  Crown,
+  Award,
+  Target,
+  Flame,
+  Zap as Lightning,
+} from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import type { PostgrestError } from "@supabase/supabase-js";
 
 type ReactionType = "like" | "love" | "thanks" | "insightful" | "dislike";
 type CommentStatus = "pending" | "approved" | "needs_revision" | "featured";
 type FilterType = "all" | "featured" | "approved" | "request_edit";
+
+interface Reactions {
+  like: number;
+  love: number;
+  thanks: number;
+  insightful: number;
+  dislike: number;
+}
 
 interface GuestbookComment {
   id: string;
@@ -19,13 +55,7 @@ interface GuestbookComment {
   website?: string;
   status: CommentStatus;
   is_featured: boolean;
-  reactions: {
-    like: number;
-    love: number;
-    thanks: number;
-    insightful: number;
-    dislike: number;
-  };
+  reactions: Reactions;
   user_token?: string;
   created_at: string;
   updated_at: string;
@@ -68,6 +98,60 @@ interface StatCard {
   color: string;
 }
 
+// Helper function untuk mendapatkan IP address
+const getUserIp = async (): Promise<string> => {
+  try {
+    const response = await fetch("https://api.ipify.org?format=json");
+    const data = await response.json();
+    return data.ip || "unknown";
+  } catch (error) {
+    console.error(error);
+    const token = localStorage.getItem("user_token") || "unknown";
+    return token;
+  }
+};
+
+// Helper untuk normalize reactions
+const normalizeReactions = (reactions: unknown): Reactions => {
+  if (!reactions || typeof reactions !== "object") {
+    return { like: 0, love: 0, thanks: 0, insightful: 0, dislike: 0 };
+  }
+
+  const reactionObj = reactions as Record<string, unknown>;
+
+  return {
+    like: typeof reactionObj.like === "number" ? reactionObj.like : 0,
+    love: typeof reactionObj.love === "number" ? reactionObj.love : 0,
+    thanks: typeof reactionObj.thanks === "number" ? reactionObj.thanks : 0,
+    insightful: typeof reactionObj.insightful === "number" ? reactionObj.insightful : 0,
+    dislike: typeof reactionObj.dislike === "number" ? reactionObj.dislike : 0,
+  };
+};
+
+// Hitung total reactions positif (tidak termasuk dislike)
+const calculatePositiveReactions = (reactions: Reactions): number => {
+  return reactions.like + reactions.love + reactions.thanks + reactions.insightful;
+};
+
+// Type untuk Supabase guestbook row (partial)
+type GuestbookRow = {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  profession?: string;
+  website?: string;
+  status: CommentStatus;
+  is_featured: boolean;
+  reactions: unknown;
+  user_token?: string;
+  created_at: string;
+  updated_at: string;
+  ip_address?: string;
+  user_agent?: string;
+  is_spam?: boolean;
+};
+
 export default function GuestbookPage() {
   const router = useRouter();
   const [comments, setComments] = useState<GuestbookComment[]>([]);
@@ -90,6 +174,9 @@ export default function GuestbookPage() {
   const [showReactionSuccess, setShowReactionSuccess] = useState(false);
   const [showReactionError, setShowReactionError] = useState(false);
 
+  // Reaction state
+  const [isReacting, setIsReacting] = useState<string | null>(null);
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(9);
@@ -99,6 +186,10 @@ export default function GuestbookPage() {
     type: ReactionType;
     count: number;
   }>({ type: "like", count: 0 });
+
+  // Champion comment (highest positive reactions)
+  const [championComment, setChampionComment] = useState<GuestbookComment | null>(null);
+  const [championReactionTotal, setChampionReactionTotal] = useState(0);
 
   // Reactions options
   const reactionOptions: ReactionOption[] = [
@@ -126,8 +217,27 @@ export default function GuestbookPage() {
 
       if (error) throw error;
 
-      setComments(data || []);
-      calculateStats(data || []);
+      // Normalize reactions data dengan type safety
+      const normalizedData: GuestbookComment[] = (data || []).map((row: GuestbookRow) => ({
+        id: row.id,
+        name: row.name,
+        email: row.email,
+        message: row.message,
+        profession: row.profession,
+        website: row.website,
+        status: row.status,
+        is_featured: row.is_featured,
+        reactions: normalizeReactions(row.reactions),
+        user_token: row.user_token,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+      }));
+
+      setComments(normalizedData);
+      calculateStats(normalizedData);
+
+      // Calculate champion comment
+      findChampionComment(normalizedData);
     } catch (error) {
       console.error("Error fetching comments:", error);
     } finally {
@@ -135,8 +245,57 @@ export default function GuestbookPage() {
     }
   }, [calculateStats]);
 
+  // Function to find champion comment
+  const findChampionComment = useCallback((commentsData: GuestbookComment[]) => {
+    if (commentsData.length === 0) {
+      setChampionComment(null);
+      setChampionReactionTotal(0);
+      return;
+    }
+
+    let champion: GuestbookComment | null = null;
+    let highestPositiveReactions = 0;
+
+    commentsData.forEach((comment) => {
+      const positiveReactions = calculatePositiveReactions(comment.reactions);
+
+      if (positiveReactions > highestPositiveReactions) {
+        highestPositiveReactions = positiveReactions;
+        champion = comment;
+      }
+    });
+
+    setChampionComment(champion);
+    setChampionReactionTotal(highestPositiveReactions);
+  }, []);
+
   useEffect(() => {
     fetchComments();
+
+    // Sync reactions status saat component mount
+    const syncReactions = async () => {
+      const userToken = localStorage.getItem("user_token");
+      if (userToken) {
+        try {
+          const { data: reactions, error } = await supabase.from("guestbook_reactions").select("guestbook_id").eq("user_token", userToken);
+
+          if (error) {
+            console.error("Error fetching reactions:", error);
+            return;
+          }
+
+          if (reactions) {
+            reactions.forEach((reaction) => {
+              localStorage.setItem(`reacted_${reaction.guestbook_id}`, "true");
+            });
+          }
+        } catch (error) {
+          console.error("Error syncing reactions:", error);
+        }
+      }
+    };
+
+    syncReactions();
   }, [fetchComments]);
 
   // Calculate most popular reaction
@@ -152,7 +311,7 @@ export default function GuestbookPage() {
 
       comments.forEach((comment) => {
         Object.entries(comment.reactions).forEach(([type, count]) => {
-          reactionTotals[type as ReactionType] += count as number;
+          reactionTotals[type as ReactionType] += count;
         });
       });
 
@@ -178,11 +337,14 @@ export default function GuestbookPage() {
     return true;
   });
 
-  // Pagination calculations
-  const totalPages = Math.ceil(filteredComments.length / itemsPerPage);
+  // Exclude champion comment from regular comments list
+  const commentsWithoutChampion = filteredComments.filter((comment) => !championComment || comment.id !== championComment.id);
+
+  // Pagination calculations (excluding champion)
+  const totalPages = Math.ceil(commentsWithoutChampion.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentComments = filteredComments.slice(indexOfFirstItem, indexOfLastItem);
+  const currentComments = commentsWithoutChampion.slice(indexOfFirstItem, indexOfLastItem);
 
   // Generate pagination numbers
   const getPaginationNumbers = () => {
@@ -215,6 +377,13 @@ export default function GuestbookPage() {
     setIsSubmitting(true);
 
     try {
+      // Generate user token if not exists
+      let userToken = localStorage.getItem("user_token");
+      if (!userToken) {
+        userToken = crypto.randomUUID();
+        localStorage.setItem("user_token", userToken);
+      }
+
       const { data, error } = await supabase
         .from("guestbook")
         .insert([
@@ -223,6 +392,8 @@ export default function GuestbookPage() {
             status: "pending",
             is_featured: false,
             reactions: { like: 0, love: 0, thanks: 0, insightful: 0, dislike: 0 },
+            user_token: userToken,
+            ip_address: await getUserIp(),
           },
         ])
         .select()
@@ -230,8 +401,24 @@ export default function GuestbookPage() {
 
       if (error) throw error;
 
-      setComments((prev) => [data, ...prev]);
-      calculateStats([data, ...comments]);
+      // Normalize the new comment
+      const newComment: GuestbookComment = {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        message: data.message,
+        profession: data.profession,
+        website: data.website,
+        status: data.status,
+        is_featured: data.is_featured,
+        reactions: normalizeReactions(data.reactions),
+        user_token: data.user_token,
+        created_at: data.created_at,
+        updated_at: data.updated_at,
+      };
+
+      setComments((prev) => [newComment, ...prev]);
+      calculateStats([newComment, ...comments]);
       setShowForm(false);
       setFormData({ name: "", email: "", message: "", profession: "", website: "" });
       setCurrentPage(1);
@@ -248,41 +435,163 @@ export default function GuestbookPage() {
     }
   };
 
-  // Handle reaction
+  // Handle reaction - dengan type safety yang lengkap
   const handleReaction = useCallback(
     async (commentId: string, reactionType: ReactionType) => {
-      try {
-        const comment = comments.find((c) => c.id === commentId);
-        if (!comment) return;
+      if (isReacting === commentId) return;
+      setIsReacting(commentId);
 
-        const hasReacted = localStorage.getItem(`reacted_${commentId}`);
-        if (hasReacted) {
+      try {
+        // Cek localStorage dulu
+        const localStorageKey = `reacted_${commentId}`;
+        if (localStorage.getItem(localStorageKey)) {
           setShowAlreadyReacted(true);
           setTimeout(() => setShowAlreadyReacted(false), 2000);
           return;
         }
 
-        const newReactions = {
-          ...comment.reactions,
+        // Get comment
+        const comment = comments.find((c) => c.id === commentId);
+        if (!comment) {
+          console.error("Comment not found:", commentId);
+          return;
+        }
+
+        // Get user token
+        let userToken = localStorage.getItem("user_token");
+        if (!userToken) {
+          userToken = crypto.randomUUID();
+          localStorage.setItem("user_token", userToken);
+        }
+
+        // Update reactions count
+        const newReactions: Reactions = {
+          like: comment.reactions.like,
+          love: comment.reactions.love,
+          thanks: comment.reactions.thanks,
+          insightful: comment.reactions.insightful,
+          dislike: comment.reactions.dislike,
           [reactionType]: comment.reactions[reactionType] + 1,
         };
 
-        const { error } = await supabase.from("guestbook").update({ reactions: newReactions }).eq("id", commentId);
+        console.log("Updating reactions:", {
+          commentId,
+          reactionType,
+          currentReactions: comment.reactions,
+          newReactions,
+        });
 
-        if (error) throw error;
+        // 1. Update guestbook dengan reactions yang lengkap
+        const { error: updateError } = await supabase
+          .from("guestbook")
+          .update({
+            reactions: newReactions,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", commentId);
 
-        localStorage.setItem(`reacted_${commentId}`, "true");
-        setComments((prev) => prev.map((c) => (c.id === commentId ? { ...c, reactions: newReactions } : c)));
+        if (updateError) {
+          console.error("Update error details:", updateError);
+          throw updateError;
+        }
+
+        // 2. Insert reaction record
+        const { error: reactionError } = await supabase.from("guestbook_reactions").insert([
+          {
+            guestbook_id: commentId,
+            ip_address: await getUserIp(),
+            reaction_type: reactionType,
+            user_token: userToken,
+            created_at: new Date().toISOString(),
+          },
+        ]);
+
+        if (reactionError) {
+          // Jika error karena unique constraint
+          if (reactionError.code === "23505") {
+            console.log("User sudah pernah react");
+            setShowAlreadyReacted(true);
+            setTimeout(() => setShowAlreadyReacted(false), 2000);
+            return;
+          }
+          console.warn("Reaction insert error (non-critical):", reactionError);
+          // Lanjutkan meskipun insert reaction gagal, karena reaction count sudah diupdate
+        }
+
+        // Update localStorage
+        localStorage.setItem(localStorageKey, "true");
+
+        // Update state dengan data yang benar
+        const updatedComments = comments.map((c) =>
+          c.id === commentId
+            ? {
+                ...c,
+                reactions: newReactions,
+                updated_at: new Date().toISOString(),
+              }
+            : c
+        );
+
+        setComments(updatedComments);
+
+        // Recalculate champion after update
+        findChampionComment(updatedComments);
 
         setShowReactionSuccess(true);
         setTimeout(() => setShowReactionSuccess(false), 1500);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error("Error updating reaction:", error);
+
+        // Type safe error handling
+        const postgrestError = error as PostgrestError;
+        if (postgrestError?.code === "23505") {
+          setShowAlreadyReacted(true);
+          setTimeout(() => setShowAlreadyReacted(false), 2000);
+          return;
+        }
+
+        // Coba fallback update
+        try {
+          const comment = comments.find((c) => c.id === commentId);
+          if (comment) {
+            const newReactions: Reactions = {
+              like: comment.reactions.like,
+              love: comment.reactions.love,
+              thanks: comment.reactions.thanks,
+              insightful: comment.reactions.insightful,
+              dislike: comment.reactions.dislike,
+              [reactionType]: comment.reactions[reactionType] + 1,
+            };
+
+            // Update lokal saja
+            const updatedComments = comments.map((c) =>
+              c.id === commentId
+                ? {
+                    ...c,
+                    reactions: newReactions,
+                  }
+                : c
+            );
+
+            setComments(updatedComments);
+            findChampionComment(updatedComments);
+
+            localStorage.setItem(`reacted_${commentId}`, "true");
+            setShowReactionSuccess(true);
+            setTimeout(() => setShowReactionSuccess(false), 1500);
+            return;
+          }
+        } catch (fallbackError) {
+          console.error("Fallback also failed:", fallbackError);
+        }
+
         setShowReactionError(true);
         setTimeout(() => setShowReactionError(false), 2000);
+      } finally {
+        setTimeout(() => setIsReacting(null), 1000);
       }
     },
-    [comments]
+    [comments, isReacting, findChampionComment]
   );
 
   // Form state
@@ -509,6 +818,126 @@ export default function GuestbookPage() {
           </motion.div>
         </motion.div>
 
+        {/* CHAMPION CARD - Only show if there's a champion with positive reactions */}
+        {championComment && championReactionTotal > 0 && (
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.8 }} className="mb-8 md:mb-10">
+            <div className="relative overflow-hidden rounded-2xl md:rounded-3xl border-2 border-transparent bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-orange-500/20 p-0.5">
+              {/* Animated gradient border */}
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-500 via-yellow-500 to-orange-500 opacity-30 animate-pulse"></div>
+
+              {/* Inner content */}
+              <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-2xl md:rounded-3xl p-4 md:p-6 backdrop-blur-sm">
+                {/* Champion badge */}
+                <div className="absolute -top-3 -right-3 md:-top-4 md:-right-4 z-20">
+                  <div className="relative">
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }} className="absolute inset-0 bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full blur-md" />
+                    <div className="relative bg-gradient-to-r from-yellow-500 to-amber-500 p-2 md:p-3 rounded-full shadow-2xl">
+                      <Crown className="size-6 md:size-8 text-white" fill="currentColor" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Header */}
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6 mb-4 md:mb-6">
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <div className="relative">
+                      <div className="size-12 md:size-16 rounded-full bg-gradient-to-br from-yellow-500/30 to-amber-500/30 flex items-center justify-center border-2 border-yellow-500/50">
+                        <span className="text-xl md:text-2xl font-bold text-yellow-300">{championComment.name.charAt(0).toUpperCase()}</span>
+                      </div>
+                      <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full p-1">
+                        <Trophy className="size-4 md:size-5 text-white" />
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-lg md:text-xl font-bold text-white flex items-center gap-2">
+                        <span>🏆 Champion Comment</span>
+                      </h3>
+                      <p className="text-yellow-300 text-sm md:text-base font-semibold">Most Loved by Community</p>
+                    </div>
+                  </div>
+
+                  {/* Reaction stats */}
+                  <div className="ml-auto flex items-center gap-4 md:gap-6">
+                    <div className="text-center">
+                      <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">{championReactionTotal}</div>
+                      <div className="text-xs md:text-sm text-yellow-300/80">Positive Reactions</div>
+                    </div>
+                    <div className="hidden md:block h-8 w-px bg-gradient-to-b from-transparent via-yellow-500/30 to-transparent"></div>
+                    <div className="text-center">
+                      <div className="text-xl md:text-2xl font-bold text-white">#1</div>
+                      <div className="text-xs md:text-sm text-gray-400">Rank</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Comment content */}
+                <div className="mb-4 md:mb-6">
+                  <div className="flex items-start gap-3 md:gap-4 mb-3 md:mb-4">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-white text-base md:text-lg truncate flex items-center gap-2">
+                        {championComment.name}
+                        {championComment.profession && <span className="text-sm text-yellow-300 font-normal">• {championComment.profession}</span>}
+                      </h4>
+                      {championComment.website && (
+                        <a href={championComment.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs md:text-sm text-blue-400 hover:text-blue-300 transition-colors truncate">
+                          <Globe size={12} className="md:size-4" />
+                          <span className="truncate">{championComment.website.replace(/^https?:\/\//, "")}</span>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <div className="absolute -left-2 top-0 bottom-0 w-1 bg-gradient-to-b from-yellow-500 to-amber-500 rounded-full"></div>
+                    <p className="text-gray-200 text-sm md:text-base pl-4 line-clamp-2 md:line-clamp-3">{championComment.message}</p>
+                  </div>
+                </div>
+
+                {/* Reaction breakdown */}
+                <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-yellow-500/20">
+                  <div className="flex items-center gap-2 md:gap-3">
+                    {reactionOptions
+                      .filter((r) => r.type !== "dislike")
+                      .map((reaction) => {
+                        const ReactionIcon = reaction.icon;
+                        const count = championComment.reactions[reaction.type];
+                        return count > 0 ? (
+                          <div key={reaction.type} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800/50">
+                            <ReactionIcon size={16} className={reaction.color} />
+                            <span className="text-sm font-medium text-gray-300">{count}</span>
+                            <span className="text-xs text-gray-400">{reaction.label}</span>
+                          </div>
+                        ) : null;
+                      })}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-yellow-500/20 to-amber-500/20">
+                      <Flame className="size-4 text-orange-400" />
+                      <span className="text-sm text-yellow-300 font-medium">Community Favorite</span>
+                    </div>
+                    <button
+                      onClick={() => handleReaction(championComment.id, "like")}
+                      disabled={isReacting === championComment.id}
+                      className="px-4 py-2 rounded-lg bg-gradient-to-r from-yellow-600 to-amber-600 hover:from-yellow-700 hover:to-amber-700 text-white font-medium transition-all disabled:opacity-50"
+                    >
+                      Vote for Champion
+                    </button>
+                  </div>
+                </div>
+
+                {/* Sparkle effects */}
+                <div className="absolute top-4 left-4 opacity-30">
+                  <Sparkles className="size-6 text-yellow-400" />
+                </div>
+                <div className="absolute bottom-4 right-4 opacity-30">
+                  <Award className="size-6 text-amber-400" />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {/* CTA Button */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="text-center mb-8 md:mb-10">
           <motion.button
@@ -552,7 +981,7 @@ export default function GuestbookPage() {
             <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} className="size-10 md:size-12 border-4 border-purple-500 border-t-transparent rounded-full mb-3 md:mb-4" />
             <p className="text-gray-400 text-sm md:text-base">Loading comments...</p>
           </div>
-        ) : filteredComments.length === 0 ? (
+        ) : commentsWithoutChampion.length === 0 ? (
           <div className="text-center py-16 md:py-20">
             <div className="text-4xl md:text-6xl mb-3 md:mb-4">📝</div>
             <h3 className="text-xl md:text-2xl font-bold mb-2">No comments yet</h3>
@@ -572,6 +1001,7 @@ export default function GuestbookPage() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
               {currentComments.map((comment, index) => {
                 const isNeedsRevision = comment.status === "needs_revision";
+                const positiveReactions = calculatePositiveReactions(comment.reactions);
 
                 return (
                   <motion.div
@@ -668,21 +1098,25 @@ export default function GuestbookPage() {
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => handleReaction(comment.id, reaction.type)}
-                                className="flex items-center gap-1 px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 transition-all duration-300"
+                                disabled={isReacting === comment.id}
+                                className="flex items-center gap-1 px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 <ReactionIcon size={14} className={`md:size-4 ${reaction.color}`} />
-                                <span className="text-xs md:text-sm text-gray-300">{comment.reactions[reaction.type] || 0}</span>
+                                <span className="text-xs md:text-sm text-gray-300">{comment.reactions[reaction.type]}</span>
                               </motion.button>
                             );
                           })}
                         </div>
 
-                        <div className="text-[10px] md:text-xs text-gray-500 whitespace-nowrap">
-                          {new Date(comment.created_at).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
+                        <div className="flex items-center gap-2">
+                          {positiveReactions > 0 && <div className="text-xs text-yellow-400 font-medium bg-yellow-500/10 px-2 py-0.5 rounded-full">+{positiveReactions}</div>}
+                          <div className="text-[10px] md:text-xs text-gray-500 whitespace-nowrap">
+                            {new Date(comment.created_at).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -696,7 +1130,7 @@ export default function GuestbookPage() {
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center gap-3 md:gap-4 mb-10 md:mb-12">
                 {/* Pagination Info */}
                 <div className="text-gray-400 text-xs md:text-sm text-center px-4">
-                  Page {currentPage} of {totalPages} • Showing {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredComments.length)} of {filteredComments.length} comments
+                  Page {currentPage} of {totalPages} • Showing {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, commentsWithoutChampion.length)} of {commentsWithoutChampion.length} comments
                 </div>
 
                 {/* Pagination Controls */}
