@@ -1,9 +1,8 @@
 import { LucideIcon } from "lucide-react";
+import { GuestbookComment } from "@/types/guestbook";
 
-// Status types
 export type StatusType = "all" | "pending" | "approved" | "featured" | "needs_revision";
 
-// Status filter options
 export interface StatusOption {
   value: StatusType;
   label: string;
@@ -13,29 +12,33 @@ export interface StatusOption {
   icon: LucideIcon;
 }
 
-// Modal types
-export type ModalType = "delete" | "approve" | "feature" | "needsRevision" | null;
+export type ModalType = "delete" | "approve" | "feature" | "needsRevision" | "edit" | null;
 
 export interface ModalState {
   type: ModalType;
   commentId: string | null;
   commentName: string;
+  commentData?: Partial<GuestbookComment>;
 }
 
-// Auto-delete configuration
-export interface AutoDeleteConfig {
-  deleteAfterSeconds: number;
-  isTesting: boolean;
+export interface EditFormData {
+  name: string;
+  email: string;
+  message: string;
+  profession: string;
+  website: string;
+
 }
 
-// Admin component props
-// export interface AdminGuestbookPageProps {
-//   // Add any props if needed
-// }
-
-// Filter state
-export interface FilterState {
-  searchTerm: string;
-  statusFilter: StatusType;
-  showStatusDropdown: boolean;
+export interface GuestbookUpdateDTO {
+  name?: string;
+  email?: string;
+  message?: string;
+  profession?: string | null;
+  website?: string | null;
+  status?: string;
+  is_featured?: boolean;
+  is_spam?: boolean;
+  updated_at?: string;
+  status_updated_at?: string;
 }

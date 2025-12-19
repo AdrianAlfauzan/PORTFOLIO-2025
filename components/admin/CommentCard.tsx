@@ -1,5 +1,7 @@
+"use client";
+
 import { motion } from "framer-motion";
-import { Clock, Check, Star, Edit, Trash2 } from "lucide-react";
+import { Clock, Check, Star, Edit, Trash2, Settings } from "lucide-react";
 import { GuestbookComment } from "@/types/guestbook";
 import { StatusOption } from "@/types/admin";
 
@@ -10,9 +12,10 @@ interface CommentCardProps {
   getTimeUntilDelete: (dateString: string) => string;
   isAboutToBeDeleted: (dateString: string) => boolean;
   openModal: (type: "delete" | "approve" | "feature" | "needsRevision" | null, id: string, name: string) => void;
+  openEditModal: (id: string, name: string, data: Partial<GuestbookComment>) => void;
 }
 
-export const CommentCard = ({ comment, statusOptions, getStatusColor, getTimeUntilDelete, isAboutToBeDeleted, openModal }: CommentCardProps) => {
+export const CommentCard = ({ comment, statusOptions, getStatusColor, getTimeUntilDelete, isAboutToBeDeleted, openModal, openEditModal }: CommentCardProps) => {
   const StatusIcon = statusOptions.find((opt) => opt.value === comment.status)?.icon;
   const willBeDeleted = comment.status === "needs_revision" && isAboutToBeDeleted(comment.status_updated_at);
 
@@ -92,27 +95,43 @@ export const CommentCard = ({ comment, statusOptions, getStatusColor, getTimeUnt
 
         {/* Actions */}
         <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-700/50">
+          {/* BUTTON EDIT  */}
+          <button
+            onClick={() =>
+              openEditModal(comment.id, comment.name, {
+                name: comment.name,
+                email: comment.email,
+                message: comment.message,
+                profession: comment.profession || "",
+                website: comment.website || "",
+                status: comment.status,
+                is_featured: comment.is_featured,
+                is_spam: comment.is_spam || false,
+              })
+            }
+            className="px-4 py-2 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-300 flex items-center gap-2 text-sm"
+          >
+            <Settings size={16} />
+            Edit
+          </button>
           {comment.status !== "approved" && comment.status !== "featured" && (
             <button onClick={() => openModal("approve", comment.id, comment.name)} className="px-4 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-300 flex items-center gap-2 text-sm">
               <Check size={16} />
               Approve
             </button>
           )}
-
           {!comment.is_featured && (
             <button onClick={() => openModal("feature", comment.id, comment.name)} className="px-4 py-2 rounded-lg bg-yellow-600/20 hover:bg-yellow-600/30 border border-yellow-500/30 text-yellow-300 flex items-center gap-2 text-sm">
               <Star size={16} />
               Feature
             </button>
           )}
-
           {comment.status !== "needs_revision" && (
             <button onClick={() => openModal("needsRevision", comment.id, comment.name)} className="px-4 py-2 rounded-lg bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 text-orange-300 flex items-center gap-2 text-sm">
               <Edit size={16} />
               Needs Revision
             </button>
           )}
-
           <button
             onClick={() => openModal("delete", comment.id, comment.name)}
             className={`px-4 py-2 rounded-lg border text-sm flex items-center gap-2 ${

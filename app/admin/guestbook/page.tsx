@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { DeleteModal, ApproveModal, FeatureModal, NeedsRevisionModal } from "@/components/admin/Modals";
 import { AdminLogin } from "@/components/admin/AdminLogin";
 import { CommentCard } from "@/components/admin/CommentCard";
+import { EditModal } from "@/components/admin/EditModal";
 
 // OUR HOOKS
 import { useAutoDeleteComments } from "@/hooks/useAutoDeleteComments";
@@ -29,7 +30,7 @@ export default function AdminGuestbookPage() {
   const { isAuthenticated, password, setPassword, handleLogin, handleLogout } = useAuthAdmin();
 
   // Guestbook data and operations
-  const { comments, isLoading, modalState, openModal, closeModal, refreshComments, handleDeleteConfirm, handleApproveConfirm, handleFeatureConfirm, handleNeedsRevisionConfirm } = useGuestbookAdmin();
+  const { comments, isLoading, modalState, openModal, openEditModal, closeModal, refreshComments, handleDeleteConfirm, handleApproveConfirm, handleFeatureConfirm, handleNeedsRevisionConfirm, handleEditConfirm } = useGuestbookAdmin();
 
   // Filters
   const { searchTerm, setSearchTerm, statusFilter, setStatusFilter, showStatusDropdown, setShowStatusDropdown, filteredComments } = useCommentFilters(comments);
@@ -51,6 +52,9 @@ export default function AdminGuestbookPage() {
     setStatusFilter(status);
     setShowStatusDropdown(false);
   };
+
+  // Debug log
+  console.log("Modal State:", modalState);
 
   if (!isAuthenticated) {
     return <AdminLogin password={password} setPassword={setPassword} handleLogin={handleLogin} />;
@@ -186,7 +190,16 @@ export default function AdminGuestbookPage() {
         ) : (
           <div className="space-y-4">
             {filteredComments.map((comment) => (
-              <CommentCard key={comment.id} comment={comment} statusOptions={statusOptions} getStatusColor={getStatusColor} getTimeUntilDelete={getTimeUntilDelete} isAboutToBeDeleted={isAboutToBeDeleted} openModal={openModal} />
+              <CommentCard
+                key={comment.id}
+                comment={comment}
+                statusOptions={statusOptions}
+                getStatusColor={getStatusColor}
+                getTimeUntilDelete={getTimeUntilDelete}
+                isAboutToBeDeleted={isAboutToBeDeleted}
+                openModal={openModal}
+                openEditModal={openEditModal}
+              />
             ))}
           </div>
         )}
@@ -207,10 +220,47 @@ export default function AdminGuestbookPage() {
       </div>
 
       {/* Modals */}
-      <DeleteModal isOpen={modalState.type === "delete"} onClose={closeModal} onConfirm={handleDeleteConfirm} commentName={modalState.commentName} />
-      <ApproveModal isOpen={modalState.type === "approve"} onClose={closeModal} onConfirm={handleApproveConfirm} commentName={modalState.commentName} />
-      <FeatureModal isOpen={modalState.type === "feature"} onClose={closeModal} onConfirm={handleFeatureConfirm} commentName={modalState.commentName} />
-      <NeedsRevisionModal isOpen={modalState.type === "needsRevision"} onClose={closeModal} onConfirm={handleNeedsRevisionConfirm} commentName={modalState.commentName} />
+      <DeleteModal
+        isOpen={modalState.type === "delete"} //
+        onClose={closeModal}
+        onConfirm={handleDeleteConfirm}
+        commentName={modalState.commentName}
+      />
+      <ApproveModal
+        isOpen={modalState.type === "approve"} //
+        onClose={closeModal}
+        onConfirm={handleApproveConfirm}
+        commentName={modalState.commentName}
+      />
+      <FeatureModal
+        isOpen={modalState.type === "feature"} //
+        onClose={closeModal}
+        onConfirm={handleFeatureConfirm}
+        commentName={modalState.commentName}
+      />
+      <NeedsRevisionModal
+        isOpen={modalState.type === "needsRevision"} //
+        onClose={closeModal}
+        onConfirm={handleNeedsRevisionConfirm}
+        commentName={modalState.commentName}
+      />
+      {/* EDIT MODAL - DENGAN initialData */}
+      <EditModal
+        isOpen={modalState.type === "edit"}
+        onClose={closeModal}
+        onConfirm={handleEditConfirm}
+        commentName={modalState.commentName}
+        initialData={
+          modalState.commentData
+            ? {
+                ...modalState.commentData,
+                profession: modalState.commentData.profession || "",
+                website: modalState.commentData.website || "",
+              }
+            : undefined
+        }
+        key={modalState.commentId}
+      />
     </div>
   );
 }
