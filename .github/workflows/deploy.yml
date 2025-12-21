@@ -1,4 +1,4 @@
-name: 🚀 Deploy to Domain
+name: 🚀 Deploy Portfolio to VPS
 
 on:
   push:
@@ -9,26 +9,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📦 Checkout
+      - name: 📦 Checkout Code
         uses: actions/checkout@v4
 
-      - name: ⚙️ Setup Node 22
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: "npm"
 
-      - name: 📥 Install & Build
-        run: |
-          npm ci
-          npm run build
-          echo "✅ Build completed"
+      - name: 📥 Install Dependencies
+        run: npm ci
 
-          # Cek output Next.js
-          if [ -d ".next" ]; then
-            echo "📁 Next.js build: .next/"
-            ls -la .next/
-          fi
+      - name: 🔨 Build Next.js
+        run: npm run build
+        env:
+          CI: false
 
       - name: 📤 Upload to VPS
         uses: appleboy/scp-action@v0.1.7
@@ -41,37 +37,38 @@ jobs:
             public/
             package.json
             package-lock.json
-          target: "/var/www/portfolio-2025"
+            next.config.*
+          target: "/root/PORTFOLIO-2025" # ✅ INI YANG BENAR!
 
-      - name: 🚀 Restart Next.js on VPS
+      - name: 🚀 Restart Next.js
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPSHOST }}
           username: ${{ secrets.VPSUSER }}
           password: ${{ secrets.VPSPASS }}
           script: |
-            echo "🚀 Restarting Next.js..."
+            echo "🚀 Starting deployment..."
 
-            cd /var/www/portfolio-2025
+            cd /root/PORTFOLIO-2025  # ✅ INI YANG BENAR!
 
             # Install dependencies
             npm ci --production
 
-            # Install PM2 jika belum
+            # Install PM2 if needed
             if ! command -v pm2 &> /dev/null; then
               npm install -g pm2
             fi
 
-            # Stop process lama
+            # Stop old process
             pm2 stop portfolio 2>/dev/null || true
             pm2 delete portfolio 2>/dev/null || true
 
-            # Start Next.js di PORT 8888
+            # Start Next.js on PORT 8888
             PORT=8888 pm2 start npm --name "portfolio" -- start
 
             # Save PM2
             pm2 save
 
-            echo "✅ Next.js running on port 8888"
-            echo "🌐 Domain: https://portfolio.domaicuan.my.id"
+            echo "✅ Deployment completed!"
+            echo "🌐 Website: https://portfolio.domaicuan.my.id"
             echo "📊 Check: pm2 status"
