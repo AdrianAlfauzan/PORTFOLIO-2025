@@ -9,64 +9,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📦 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: ⚙️ Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "npm"
-
-      - name: 📥 Install Dependencies
-        run: npm ci
-
-      - name: 🔨 Build Next.js
-        run: |
-          echo "🔧 Building with env variables..."
-          npm run build
+      - name: 🐳 Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
         env:
-          CI: false
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_ADMIN_PASSWORD: ${{ secrets.NEXT_PUBLIC_ADMIN_PASSWORD }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-
-      # REMOVED: 📤 Upload ALL Files (FIX) step
-
-      - name: 🐳 Deploy to Server via Git Pull
-        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPSHOST }}
           username: ${{ secrets.VPSUSER }}
           password: ${{ secrets.VPSPASS }}
           script: |
-            echo "🚀 Updating code on server..."
+            echo "🚀 Deploying new update..."
             cd /root/PORTFOLIO-2025
 
-            # Pull latest code from GitHub
+            # Pull latest code
             git pull origin main
 
-            # Ensure .env.production exists
+            # Update .env.production
             cat > .env.production << EOF
-            NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-            NEXT_PUBLIC_ADMIN_PASSWORD=${{ secrets.NEXT_PUBLIC_ADMIN_PASSWORD }}
-            SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+            NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+            NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+            NEXT_PUBLIC_ADMIN_PASSWORD=$NEXT_PUBLIC_ADMIN_PASSWORD
+            SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY
             EOF
 
-            # Cleanup old container
+            # Rebuild container
             docker stop portfolio-2025 2>/dev/null || true
             docker rm portfolio-2025 2>/dev/null || true
             docker rmi portfolio-app 2>/dev/null || true
 
-            # Build and run new container
             docker build -t portfolio-app --no-cache .
-            docker run -dp 8888:8888 \
-              --name portfolio-2025 \
-              --restart always \
-              portfolio-app
+            docker run -dp 8888:8888 --name portfolio-2025 --restart always portfolio-app
 
             echo "✅ Deployed! https://portfolio.domaicuan.my.id"
-            echo "📊 Container status:"
+            echo "📊 Container:"
             docker ps | grep portfolio
+            echo "⏳ Waiting for app..."
+            sleep 10
