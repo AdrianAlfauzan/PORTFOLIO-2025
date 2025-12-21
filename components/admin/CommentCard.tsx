@@ -17,7 +17,8 @@ interface CommentCardProps {
 
 export const CommentCard = ({ comment, statusOptions, getStatusColor, getTimeUntilDelete, isAboutToBeDeleted, openModal, openEditModal }: CommentCardProps) => {
   const StatusIcon = statusOptions.find((opt) => opt.value === comment.status)?.icon;
-  const willBeDeleted = comment.status === "needs_revision" && isAboutToBeDeleted(comment.status_updated_at);
+  // FIX: Gunakan updated_at karena status_updated_at tidak ada di type
+  const willBeDeleted = comment.status === "needs_revision" && isAboutToBeDeleted(comment.updated_at);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -81,7 +82,7 @@ export const CommentCard = ({ comment, statusOptions, getStatusColor, getTimeUnt
             <div className="flex items-center gap-2">
               <Clock size={14} className={willBeDeleted ? "text-red-400" : "text-orange-400"} />
               <span className={`text-xs ${willBeDeleted ? "text-red-300" : "text-orange-300"}`}>
-                ⏰ {getTimeUntilDelete(comment.status_updated_at)} • Status updated: {formatDate(comment.status_updated_at)}
+                ⏰ {getTimeUntilDelete(comment.updated_at)} • Status updated: {formatDate(comment.updated_at)}
                 {willBeDeleted && " • Will be auto-deleted soon!"}
               </span>
             </div>
@@ -95,7 +96,7 @@ export const CommentCard = ({ comment, statusOptions, getStatusColor, getTimeUnt
 
         {/* Actions */}
         <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-700/50">
-          {/* BUTTON EDIT  */}
+          {/* BUTTON EDIT */}
           <button
             onClick={() =>
               openEditModal(comment.id, comment.name, {

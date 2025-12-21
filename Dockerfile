@@ -1,5 +1,5 @@
 # Build stage
-FROM node:18-alpine AS builder
+FROM node:lts-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -9,7 +9,7 @@ COPY package*.json ./
 COPY package-lock.json ./
 
 # Install dependencies
-RUN npm ci --only=production
+RUN npm ci --verbose
 
 # Copy source code
 COPY . .

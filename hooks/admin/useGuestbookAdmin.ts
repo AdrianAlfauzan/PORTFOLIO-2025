@@ -9,7 +9,7 @@ import { COOKIE_NAME } from "@/constants/admin";
 import { useToast } from "@/hooks/useToast";
 
 // OUR TYPES
-import { GuestbookComment, GuestbookDBRow } from "@/types/guestbook";
+import { GuestbookComment, SupabaseGuestbookRow, CommentStatus } from "@/types/guestbook";
 import { ModalState, EditFormData, GuestbookUpdateDTO } from "@/types/admin";
 
 // OUR LIBRARIES
@@ -31,7 +31,7 @@ export const useGuestbookAdmin = () => {
   // Helper function untuk normalize reactions
   const normalizeReactions = (reactions: unknown): GuestbookComment["reactions"] => {
     if (!reactions || typeof reactions !== "object") {
-      return { like: 0, love: 0, thanks: 0, insightful: 0 };
+      return { like: 0, love: 0, thanks: 0, insightful: 0, dislike: 0 };
     }
 
     const reactionObj = reactions as Record<string, unknown>;
@@ -41,6 +41,7 @@ export const useGuestbookAdmin = () => {
       love: typeof reactionObj.love === "number" ? reactionObj.love : 0,
       thanks: typeof reactionObj.thanks === "number" ? reactionObj.thanks : 0,
       insightful: typeof reactionObj.insightful === "number" ? reactionObj.insightful : 0,
+      dislike: typeof reactionObj.dislike === "number" ? reactionObj.dislike : 0,
     };
   };
 
@@ -49,10 +50,9 @@ export const useGuestbookAdmin = () => {
     setModalState({ type, commentId, commentName, commentData });
   }, []);
 
-  // Specific function for edit modal - TAMBAHKAN KONVERSI NULL KE STRING KOSONG
+  // Specific function for edit modal
   const openEditModal = useCallback(
     (commentId: string, commentName: string, commentData: Partial<GuestbookComment>) => {
-      // Konversi null values ke empty string
       const formattedData = {
         ...commentData,
         profession: commentData.profession || "",
@@ -77,10 +77,9 @@ export const useGuestbookAdmin = () => {
 
       if (supabaseError) throw supabaseError;
 
-      // Type data sebagai GuestbookDBRow[]
-      const dbRows = data as GuestbookDBRow[];
+      const dbRows = data as SupabaseGuestbookRow[];
 
-      const commentsWithDefaults: GuestbookComment[] = dbRows.map((comment: GuestbookDBRow) => ({
+      const commentsWithDefaults: GuestbookComment[] = dbRows.map((comment: SupabaseGuestbookRow) => ({
         id: comment.id,
         name: comment.name,
         email: comment.email,
@@ -91,12 +90,11 @@ export const useGuestbookAdmin = () => {
         is_featured: comment.is_featured,
         reactions: normalizeReactions(comment.reactions),
         created_at: comment.created_at,
-        status_updated_at: comment.status_updated_at || comment.created_at,
+        updated_at: comment.updated_at,
         user_token: comment.user_token ?? undefined,
         ip_address: comment.ip_address ?? undefined,
         user_agent: comment.user_agent ?? undefined,
         is_spam: comment.is_spam ?? false,
-        updated_at: comment.updated_at,
       }));
 
       setComments(commentsWithDefaults);
@@ -134,7 +132,7 @@ export const useGuestbookAdmin = () => {
     checkAuthAndFetch();
   }, [fetchComments]);
 
-  // Update comment status (for approve, feature, needs revision)
+  // Update comment status
   const updateCommentStatus = useCallback(
     async (id: string, status: string, isFeatured: boolean = false) => {
       const validStatuses = ["pending", "approved", "featured", "needs_revision"];
@@ -147,14 +145,13 @@ export const useGuestbookAdmin = () => {
       try {
         const updates: GuestbookUpdateDTO = {
           updated_at: new Date().toISOString(),
-          status_updated_at: new Date().toISOString(),
         };
 
         if (isFeatured) {
           updates.is_featured = true;
           updates.status = "featured";
         } else {
-          updates.status = status;
+          updates.status = status as CommentStatus;
         }
 
         const { error: supabaseError } = await supabase.from("guestbook").update(updates).eq("id", id);
@@ -166,9 +163,9 @@ export const useGuestbookAdmin = () => {
             comment.id === id
               ? {
                   ...comment,
-                  status: isFeatured ? "featured" : status,
+                  status: (isFeatured ? "featured" : status) as CommentStatus,
                   is_featured: isFeatured,
-                  status_updated_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
                 }
               : comment
           )
@@ -193,25 +190,18 @@ export const useGuestbookAdmin = () => {
     [closeModal, success, error, warning]
   );
 
-  // Update full comment (for edit functionality)
+  // Update full comment
   const updateComment = useCallback(async (commentId: string, updates: GuestbookUpdateDTO) => {
     try {
-      // Add timestamps
       const fullUpdates: GuestbookUpdateDTO = {
         ...updates,
         updated_at: new Date().toISOString(),
       };
 
-      // If status changed, update status_updated_at
-      if (updates.status) {
-        fullUpdates.status_updated_at = new Date().toISOString();
-      }
-
       const { error: supabaseError } = await supabase.from("guestbook").update(fullUpdates).eq("id", commentId);
 
       if (supabaseError) throw supabaseError;
 
-      // Update local state dengan type-safe approach
       setComments((prev) =>
         prev.map((comment) => {
           if (comment.id !== commentId) return comment;
@@ -221,13 +211,18 @@ export const useGuestbookAdmin = () => {
             ...(updates.name !== undefined && { name: updates.name }),
             ...(updates.email !== undefined && { email: updates.email }),
             ...(updates.message !== undefined && { message: updates.message }),
-            ...(updates.profession !== undefined && { profession: updates.profession }),
-            ...(updates.website !== undefined && { website: updates.website }),
-            ...(updates.status !== undefined && { status: updates.status }),
+            ...(updates.profession !== undefined && {
+              profession: updates.profession || undefined,
+            }),
+            ...(updates.website !== undefined && {
+              website: updates.website || undefined,
+            }),
+            ...(updates.status !== undefined && {
+              status: updates.status as CommentStatus,
+            }),
             ...(updates.is_featured !== undefined && { is_featured: updates.is_featured }),
             ...(updates.is_spam !== undefined && { is_spam: updates.is_spam }),
             updated_at: new Date().toISOString(),
-            status_updated_at: updates.status ? new Date().toISOString() : comment.status_updated_at,
           };
         })
       );
