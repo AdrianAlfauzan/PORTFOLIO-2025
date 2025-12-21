@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  portfolio:
+    build: .
+    container_name: portfolio-2025
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    env_file:
+      - .env.production
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./public:/app/public:ro
+    networks:
+      - portfolio-network
+
+networks:
+  portfolio-network:
+    driver: bridge
