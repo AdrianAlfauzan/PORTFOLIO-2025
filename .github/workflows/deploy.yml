@@ -61,8 +61,8 @@ jobs:
             # Hapus folder lama
             rm -rf PORTFOLIO-2025
 
-            # Clone fresh dari GitHub
-            git clone https://github.com/AdrianAlfauzan/PORTFOLIO-2025.git
+            # Clone fresh dari GitHub (PAKAI TOKEN AUTH)
+            git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/AdrianAlfauzan/PORTFOLIO-2025.git
             cd PORTFOLIO-2025
 
             # Buat .env.production
