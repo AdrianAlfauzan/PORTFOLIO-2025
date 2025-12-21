@@ -10,43 +10,51 @@ import MonthlyRecapSection from "@/components/sections/MonthlyRecapSection";
 import AchievementSection from "@/components/sections/AchievementSection";
 import WelcomeModal from "@/components/WelcomeModal";
 import AnnouncementAlert from "@/components/AnnouncementAlert";
+import BackgroundScene from "@/components/3d/BackgroundScene";
 
 export default function Home() {
   return (
-    <main className="relative overflow-x-hidden bg-gradient-to-b from-black via-zinc-900 to-black">
-      <WelcomeModal />
-      <AnnouncementAlert />
-      <section id="home">
-        <HeroSection />
-      </section>
+    <main className="relative overflow-x-hidden">
+      {/* 3D Background - Fixed position */}
+      <BackgroundScene />
 
-      <section id="top-topics">
-        <TopTopicsSection />
-      </section>
+      {/* Content dengan backdrop blur untuk readability */}
+      <div className="relative z-10">
+        <WelcomeModal />
+        <AnnouncementAlert />
 
-      <section id="obsession">
-        <ObsessionSection />
-      </section>
+        <section id="home">
+          <HeroSection />
+        </section>
 
-      <section id="projects">
-        <ProjectsSection />
-      </section>
+        <section id="top-topics">
+          <TopTopicsSection />
+        </section>
 
-      <section id="monthly">
-        <MonthlyRecapSection />
-      </section>
+        <section id="obsession">
+          <ObsessionSection />
+        </section>
 
-      <section id="unexpected-question">
-        <UnexpectedQuestionSection />
-      </section>
+        <section id="projects">
+          <ProjectsSection />
+        </section>
 
-      <section id="signature-style">
-        <SignatureStyleSection />
-      </section>
+        <section id="monthly">
+          <MonthlyRecapSection />
+        </section>
 
-      <section id="achievements">
-        <AchievementSection />
-      </section>
+        <section id="unexpected-question">
+          <UnexpectedQuestionSection />
+        </section>
+
+        <section id="signature-style">
+          <SignatureStyleSection />
+        </section>
+
+        <section id="achievements">
+          <AchievementSection />
+        </section>
+      </div>
     </main>
   );
 }

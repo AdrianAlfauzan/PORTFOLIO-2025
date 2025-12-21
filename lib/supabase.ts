@@ -1,24 +1,21 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Pakai nilai dari env variables
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// Validasi STRICT - jangan fallback
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(
-    "❌ Supabase environment variables are missing!\n" +
+    "Supabase environment variables are missing!\n" +
       "Please check your .env.local file and restart the dev server.\n" +
       "Required variables:\n" +
       "- NEXT_PUBLIC_SUPABASE_URL\n" +
       "- NEXT_PUBLIC_SUPABASE_ANON_KEY\n\n" +
       "Current values:\n" +
-      `URL: ${supabaseUrl ? "✅ Set" : "❌ Missing"}\n` +
-      `Key: ${supabaseAnonKey ? "✅ Set" : "❌ Missing"}`
+      `URL: ${supabaseUrl ? "Set" : "Missing"}\n` +
+      `Key: ${supabaseAnonKey ? "Set" : "Missing"}`
   );
 }
 
-// Buat client HANYA jika semua env variables ada
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
@@ -26,4 +23,4 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
-console.log("✅ Supabase client initialized successfully");
+// console.log("Supabase client initialized successfully");

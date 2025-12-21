@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { AlertCircle, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
+import { AlertCircle, ExternalLink, ChevronDown, ChevronUp, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 export default function AnnouncementAlert() {
@@ -70,31 +70,44 @@ Thank you for being a part of this journey.`,
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop dengan blur lebih ringan */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} onClick={closeAlert} className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[90]" />
+          {/* Backdrop dengan z-index yang SANGAT TINGGI */}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} onClick={closeAlert} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[99999]" />
 
-          {/* Alert Container - Responsif untuk mobile */}
-          <div className="fixed inset-0 z-[9999] pointer-events-none">
+          {/* Alert Container - Desktop: kanan, Mobile: tengah */}
+          <div className="fixed inset-x-0 z-[100000] pointer-events-none md:flex md:justify-end">
             <motion.div
-              initial={{ opacity: 0, y: -50, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -50, scale: 0.95 }}
+              initial={{ opacity: 0, x: isMobile ? 0 : 50, y: isMobile ? 50 : 0, scale: 0.95 }}
+              animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+              exit={{ opacity: 0, x: isMobile ? 0 : 50, y: isMobile ? 50 : 0, scale: 0.95 }}
               transition={{
                 type: "spring",
                 stiffness: 200,
                 damping: 25,
                 duration: 0.5,
               }}
-              className="absolute max-w-xl w-[calc(100vw-32px)] top-4 left-4 right-4 md:top-6 md:left-auto md:right-6 md:w-full pointer-events-auto"
+              className="w-full max-w-sm md:max-w-xl mx-auto md:mx-0 md:mr-6 mt-20 md:mt-24 pointer-events-auto px-4 md:px-0"
             >
               <div className="relative rounded-xl border border-emerald-500/20 bg-gradient-to-br from-gray-900/95 to-black/95 backdrop-blur-xl shadow-2xl overflow-hidden">
                 {/* Decorative elements */}
                 <motion.div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 to-blue-400" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.5, delay: 0.1 }} />
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl" />
 
-                {/* Header */}
-                <div className="p-4 md:p-5 border-b border-white/10">
-                  <div className="flex items-start justify-between">
+                {/* Header dengan close button di dalamnya */}
+                <div className="p-4 md:p-5 border-b border-white/10 relative">
+                  {/* Close button - POSISI ABSOLUT DI DALAM HEADER */}
+                  <motion.button
+                    whileHover={{ scale: 1.1, rotate: 90 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={closeAlert}
+                    className="absolute top-4 right-4 p-1.5 md:p-2 rounded-lg bbg-white/5 hover:bg-emerald-500/20  border border-white/10 hover:border-white/30 transition-colors z-10"
+                    aria-label="Close announcement"
+                  >
+                    <X size={16} className="text-white hover:text-white" />
+                  </motion.button>
+
+                  <div className="flex items-start pr-10">
+                    {" "}
+                    {/* Tambah padding kanan untuk memberi ruang close button */}
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <div className="flex-shrink-0 p-2 rounded-lg bg-gradient-to-br from-emerald-500/20 to-blue-500/20">
                         <AlertCircle className="text-emerald-300" size={isMobile ? 18 : 20} />

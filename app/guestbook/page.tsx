@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, Inbox } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 
 // Hooks
 import { useComments } from "@/hooks/useComments";
@@ -118,8 +118,8 @@ export default function GuestbookPage() {
           </div>
         ) : filteredComments.length === 0 ? (
           <div className="text-center py-16 md:py-20">
-            <div className="text-4xl md:text-6xl mb-3 md:mb-4">
-              <Inbox className="size-16 md:size-24 text-gray-400 mb-4" />
+            <div className="flex justify-center mb-3 md:mb-4">
+              <MessageSquare className="size-16 md:size-24 text-gray-400" />
             </div>
             <h3 className="text-xl md:text-2xl font-bold mb-2">No comments yet</h3>
             <p className="text-gray-400 mb-4 md:mb-6">Be the first to leave a comment!</p>

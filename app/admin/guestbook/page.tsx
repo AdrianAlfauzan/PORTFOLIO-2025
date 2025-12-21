@@ -54,7 +54,7 @@ export default function AdminGuestbookPage() {
   };
 
   // Debug log
-  console.log("Modal State:", modalState);
+  // console.log("Modal State:", modalState);
 
   if (!isAuthenticated) {
     return <AdminLogin password={password} setPassword={setPassword} handleLogin={handleLogin} />;

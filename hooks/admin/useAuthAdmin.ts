@@ -3,7 +3,6 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/useToast";
 import { ADMIN_PASSWORD, COOKIE_NAME, COOKIE_MAX_AGE } from "@/constants/admin";
 
-// Fungsi helper untuk check cookie
 const checkAuthCookie = (): boolean => {
   if (typeof document === "undefined") return false;
 
@@ -19,14 +18,22 @@ const checkAuthCookie = (): boolean => {
 export const useAuthAdmin = () => {
   const router = useRouter();
   const { success, error } = useToast();
-
-  // Gunakan initial state langsung dari cookie check
   const [isAuthenticated, setIsAuthenticated] = useState(() => checkAuthCookie());
   const [password, setPassword] = useState("");
 
   const handleLogin = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
+      
+      // Debug: cek apakah password ada
+      console.log("Input password:", password);
+      console.log("Expected password:", ADMIN_PASSWORD);
+      
+      if (!ADMIN_PASSWORD) {
+        error("Configuration Error", "Admin password not configured", 3000);
+        return false;
+      }
+      
       if (password === ADMIN_PASSWORD) {
         setIsAuthenticated(true);
         document.cookie = `${COOKIE_NAME}=true; path=/; max-age=${COOKIE_MAX_AGE}`;

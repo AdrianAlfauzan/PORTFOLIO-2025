@@ -96,7 +96,12 @@ export default function WelcomeModal() {
                         <Rocket className="text-emerald-300" size={28} />
                       </div>
                       <div>
-                        <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-emerald-300 via-blue-300 to-white bg-clip-text text-transparent">Welcome Aboard! 🚀</h2>
+                        <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-emerald-300 via-blue-300 to-white bg-clip-text text-transparent flex items-center gap-3">
+                          Welcome Aboard!
+                          <span className="inline-flex items-center">
+                            <Rocket className="text-emerald-300" size={28} />
+                          </span>
+                        </h2>
                         <p className="text-zinc-300 text-sm mt-1">Glad to have you here!</p>
                       </div>
                     </div>
@@ -170,9 +175,10 @@ export default function WelcomeModal() {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={closeModal}
-                        className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 text-white font-semibold transition-all shadow-lg shadow-emerald-500/20"
+                        className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 text-white font-semibold transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-3"
                       >
-                        Let&apos;s Explore! 🎯
+                        <span className="text-base">Let&apos;s Explore!</span>
+                        <Sparkles size={18} />
                       </motion.button>
 
                       <motion.a

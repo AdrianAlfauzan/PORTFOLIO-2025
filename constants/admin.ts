@@ -44,7 +44,7 @@ export const statusOptions: StatusOption[] = [
   },
 ];
 
-export const ADMIN_PASSWORD = "admin123";
+export const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
 
 export const COOKIE_NAME = "admin_auth";
 export const COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days in seconds
