@@ -57,15 +57,33 @@ jobs:
             echo "🚀 Deploying..."
             cd /root/PORTFOLIO-2025
 
-            # Cleanup old
+            # Cleanup old container & image
             docker stop portfolio-2025 2>/dev/null || true
             docker rm portfolio-2025 2>/dev/null || true
+            docker rmi portfolio-app 2>/dev/null || true
 
-            # Build & Run
-            docker build -t portfolio-app .
+            # Build with environment variables
+            docker build -t portfolio-app . \
+              --build-arg NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }} \
+              --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }} \
+              --build-arg NEXT_PUBLIC_ADMIN_PASSWORD=${{ secrets.NEXT_PUBLIC_ADMIN_PASSWORD }} \
+              --build-arg SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+            # Run with environment variables
             docker run -dp 8888:8888 \
               --name portfolio-2025 \
               --restart always \
+              -e NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }} \
+              -e NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }} \
+              -e NEXT_PUBLIC_ADMIN_PASSWORD=${{ secrets.NEXT_PUBLIC_ADMIN_PASSWORD }} \
+              -e SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }} \
               portfolio-app
 
             echo "✅ Deployed! https://portfolio.domaicuan.my.id"
+
+            # Verify deployment
+            echo "📋 Checking container status..."
+            sleep 5
+            docker ps | grep portfolio-2025
+            echo "📝 Last 10 lines of logs:"
+            docker logs portfolio-2025 --tail 10
