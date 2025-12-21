@@ -46,6 +46,7 @@ jobs:
           target: "/root/PORTFOLIO-2025"
           overwrite: true
           rm: true
+          strip_components: 0
 
       - name: 🐳 Restart Docker
         uses: appleboy/ssh-action@v1.0.3
@@ -55,35 +56,37 @@ jobs:
           password: ${{ secrets.VPSPASS }}
           script: |
             echo "🚀 Deploying..."
-            cd /root/PORTFOLIO-2025
+            cd /root
 
-            # Cleanup old container & image
+            # Hapus folder lama
+            rm -rf PORTFOLIO-2025
+
+            # Clone fresh dari GitHub
+            git clone https://github.com/AdrianAlfauzan/PORTFOLIO-2025.git
+            cd PORTFOLIO-2025
+
+            # Buat .env.production
+            cat > .env.production << EOF
+            NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+            NEXT_PUBLIC_ADMIN_PASSWORD=${{ secrets.NEXT_PUBLIC_ADMIN_PASSWORD }}
+            SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+            EOF
+
+            # Hapus container & image lama
             docker stop portfolio-2025 2>/dev/null || true
             docker rm portfolio-2025 2>/dev/null || true
             docker rmi portfolio-app 2>/dev/null || true
 
-            # Build with environment variables
-            docker build -t portfolio-app . \
-              --build-arg NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }} \
-              --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }} \
-              --build-arg NEXT_PUBLIC_ADMIN_PASSWORD=${{ secrets.NEXT_PUBLIC_ADMIN_PASSWORD }} \
-              --build-arg SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-
-            # Run with environment variables
+            # Build dan run
+            docker build -t portfolio-app --no-cache .
             docker run -dp 8888:8888 \
               --name portfolio-2025 \
               --restart always \
-              -e NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }} \
-              -e NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }} \
-              -e NEXT_PUBLIC_ADMIN_PASSWORD=${{ secrets.NEXT_PUBLIC_ADMIN_PASSWORD }} \
-              -e SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }} \
               portfolio-app
 
             echo "✅ Deployed! https://portfolio.domaicuan.my.id"
-
-            # Verify deployment
-            echo "📋 Checking container status..."
-            sleep 5
-            docker ps | grep portfolio-2025
-            echo "📝 Last 10 lines of logs:"
-            docker logs portfolio-2025 --tail 10
+            echo "📊 Status:"
+            docker ps | grep portfolio
+            echo "🌐 Testing website:"
+            curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" http://localhost:8888
