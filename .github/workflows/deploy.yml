@@ -35,12 +35,19 @@ jobs:
             SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY
             EOF
 
-            # Rebuild container
+            # Rebuild container DENGAN BUILD ARGS
             docker stop portfolio-2025 2>/dev/null || true
             docker rm portfolio-2025 2>/dev/null || true
             docker rmi portfolio-app 2>/dev/null || true
 
-            docker build -t portfolio-app --no-cache .
+            # 🔧 TAMBAHKAN --build-arg DI SINI
+            docker build -t portfolio-app --no-cache \
+              --build-arg NEXT_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL" \
+              --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="$NEXT_PUBLIC_SUPABASE_ANON_KEY" \
+              --build-arg NEXT_PUBLIC_ADMIN_PASSWORD="$NEXT_PUBLIC_ADMIN_PASSWORD" \
+              --build-arg SUPABASE_SERVICE_ROLE_KEY="$SUPABASE_SERVICE_ROLE_KEY" \
+              .
+
             docker run -dp 8888:8888 --name portfolio-2025 --restart always portfolio-app
 
             echo "✅ Deployed! https://portfolio.domaicuan.my.id"
