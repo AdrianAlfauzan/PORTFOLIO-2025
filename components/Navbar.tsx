@@ -2,11 +2,13 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Sparkles, Command, ArrowLeft, ChevronDown, Home, Star, Target, FolderKanban, Calendar, HelpCircle, PenTool, Trophy, Database, User, MessageSquare, Users, Heart } from "lucide-react";
+import { Sparkles, Command, ArrowLeft, ChevronDown, Home, Star, Target, FolderKanban, Calendar, HelpCircle, PenTool, Trophy, Database, User, MessageSquare, Users, Lock } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
+
+// OUR LIBRARIES
 import { PAGES, SECTION_IDS } from "@/lib/constants";
 
-// Menu dengan kategori Community
+// menuCategories
 const menuCategories = [
   {
     name: "Core",
@@ -40,22 +42,22 @@ const menuCategories = [
     icon: Users,
     items: [
       { label: "Guestbook", id: SECTION_IDS.GUESTBOOK, icon: MessageSquare },
-      { label: "Testimonials", id: "testimonials", icon: Heart }, // Future feature
+      { label: "Admin Panel", id: SECTION_IDS.ADMIN_GUESTBOOK, icon: Lock }, // TAMBAHKAN INI
     ],
   },
 ];
-
 // Helper function untuk menentukan page type
-const getPageType = (pathname: string) => {
+const getPageType = (pathname: string): "home" | "crud" | "guestbook" | "admin" => {
   if (pathname === PAGES.CRUD) return "crud";
   if (pathname === PAGES.GUESTBOOK) return "guestbook";
+  if (pathname === PAGES.ADMIN_GUESTBOOK) return "admin";
   return "home";
 };
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState<"home" | "crud" | "guestbook">("home");
+  const [currentPage, setCurrentPage] = useState<"home" | "crud" | "guestbook" | "admin">("home");
   const router = useRouter();
   const pathname = usePathname();
 
@@ -69,9 +71,9 @@ export default function Navbar() {
     setOpen(false);
     setActiveDropdown(null);
 
-    // Handle special pages (CRUD, Guestbook)
-    if (sectionId === SECTION_IDS.CRUD || sectionId === SECTION_IDS.GUESTBOOK) {
-      const targetPage = sectionId === SECTION_IDS.CRUD ? PAGES.CRUD : PAGES.GUESTBOOK;
+    // Handle special pages (CRUD, Guestbook, Admin)
+    if (sectionId === SECTION_IDS.CRUD || sectionId === SECTION_IDS.GUESTBOOK || sectionId === SECTION_IDS.ADMIN_GUESTBOOK) {
+      const targetPage = sectionId === SECTION_IDS.CRUD ? PAGES.CRUD : sectionId === SECTION_IDS.GUESTBOOK ? PAGES.GUESTBOOK : PAGES.ADMIN_GUESTBOOK; // Untuk admin
 
       if (pathname === targetPage) {
         // Already on the page, scroll to top
@@ -99,8 +101,14 @@ export default function Navbar() {
     }
   };
 
+  // Di handleBackToHome, mungkin perlu handle dari admin:
   const handleBackToHome = () => {
-    router.push(PAGES.HOME);
+    if (currentPage === "admin") {
+      // Dari admin bisa ke guestbook atau home
+      router.push(PAGES.GUESTBOOK);
+    } else {
+      router.push(PAGES.HOME);
+    }
   };
 
   // Get page-specific styling
@@ -125,6 +133,16 @@ export default function Navbar() {
           ctaHover: "hover:from-blue-600 hover:to-cyan-700",
           iconColor: "text-blue-300",
           indicatorColor: "bg-blue-400",
+        };
+      case "admin":
+        return {
+          bgGradient: "from-red-500/10 to-orange-500/10",
+          borderColor: "border-red-500/20",
+          textColor: "text-red-300",
+          ctaGradient: "from-red-500 to-orange-600",
+          ctaHover: "hover:from-red-600 hover:to-orange-700",
+          iconColor: "text-red-300",
+          indicatorColor: "bg-red-400",
         };
       default: // home
         return {
@@ -172,6 +190,11 @@ export default function Navbar() {
                     <MessageSquare size={18} className="inline mr-2 align-middle" />
                     Guestbook
                   </>
+                ) : currentPage === "admin" ? (
+                  <>
+                    <Lock size={18} className="inline mr-2 align-middle" />
+                    Admin Panel
+                  </>
                 ) : (
                   <>
                     <User size={18} className="inline mr-2 align-middle" />
@@ -190,7 +213,10 @@ export default function Navbar() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all ${
-                    activeDropdown === category.name || category.items.some((item) => (item.id === SECTION_IDS.CRUD && currentPage === "crud") || (item.id === SECTION_IDS.GUESTBOOK && currentPage === "guestbook"))
+                    activeDropdown === category.name ||
+                    category.items.some(
+                      (item) => (item.id === SECTION_IDS.CRUD && currentPage === "crud") || (item.id === SECTION_IDS.GUESTBOOK && currentPage === "guestbook") || (item.id === SECTION_IDS.ADMIN_GUESTBOOK && currentPage === "admin")
+                    )
                       ? "bg-white/10 text-white"
                       : "text-zinc-300 hover:text-white hover:bg-white/5"
                   }`}
@@ -213,7 +239,8 @@ export default function Navbar() {
                       <div className="p-2">
                         {category.items.map((item) => {
                           const ItemIcon = item.icon;
-                          const isActive = (item.id === SECTION_IDS.CRUD && currentPage === "crud") || (item.id === SECTION_IDS.GUESTBOOK && currentPage === "guestbook");
+                          const isActive =
+                            (item.id === SECTION_IDS.CRUD && currentPage === "crud") || (item.id === SECTION_IDS.GUESTBOOK && currentPage === "guestbook") || (item.id === SECTION_IDS.ADMIN_GUESTBOOK && currentPage === "admin");
 
                           return (
                             <motion.button
@@ -246,6 +273,8 @@ export default function Navbar() {
               onClick={() => {
                 if (currentPage === "home") {
                   handleNavClick(SECTION_IDS.CRUD);
+                } else if (currentPage === "admin") {
+                  handleNavClick(SECTION_IDS.GUESTBOOK);
                 } else {
                   handleBackToHome();
                 }
@@ -258,6 +287,11 @@ export default function Navbar() {
                 <>
                   <Database size={16} className="mr-2" />
                   CRUD Demo
+                </>
+              ) : currentPage === "admin" ? (
+                <>
+                  <MessageSquare size={16} className="mr-2" />
+                  View Guestbook
                 </>
               ) : (
                 <>
@@ -349,7 +383,7 @@ export default function Navbar() {
                     <div className="space-y-1">
                       {category.items.map((item, i) => {
                         const ItemIcon = item.icon;
-                        const isActive = (item.id === SECTION_IDS.CRUD && currentPage === "crud") || (item.id === SECTION_IDS.GUESTBOOK && currentPage === "guestbook");
+                        const isActive = (item.id === SECTION_IDS.CRUD && currentPage === "crud") || (item.id === SECTION_IDS.GUESTBOOK && currentPage === "guestbook") || (item.id === SECTION_IDS.ADMIN_GUESTBOOK && currentPage === "admin");
 
                         return (
                           <motion.button
@@ -379,18 +413,29 @@ export default function Navbar() {
                 onClick={() => {
                   if (currentPage === "home") {
                     handleNavClick(SECTION_IDS.CRUD);
+                  } else if (currentPage === "admin") {
+                    handleNavClick(SECTION_IDS.GUESTBOOK); // TAMBAH INI
                   } else {
                     handleBackToHome();
                   }
                 }}
                 className={`w-full mt-6 px-5 py-3 rounded-xl font-medium transition-all flex items-center justify-center ${
-                  currentPage === "home" ? `bg-gradient-to-r ${pageStyle.ctaGradient} text-white` : "bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
+                  currentPage === "home"
+                    ? `bg-gradient-to-r ${pageStyle.ctaGradient} text-white`
+                    : currentPage === "admin"
+                    ? "bg-gradient-to-r from-blue-500 to-cyan-600 text-white" // TAMBAH STYLE UNTUK ADMIN
+                    : "bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
                 }`}
               >
                 {currentPage === "home" ? (
                   <>
                     <Database size={18} className="mr-2" />
                     Try CRUD Demo
+                  </>
+                ) : currentPage === "admin" ? (
+                  <>
+                    <MessageSquare size={18} className="mr-2" />
+                    View Guestbook
                   </>
                 ) : (
                   <>

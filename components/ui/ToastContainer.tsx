@@ -2,7 +2,11 @@
 "use client";
 
 import { AnimatePresence } from "framer-motion";
+
+// OUR COMPONENTS
 import { Toast } from "@/components/ui/Toast";
+
+// OUR HOOKS
 import { useToastList, useToastStore } from "@/hooks/useToast";
 
 export function ToastContainer() {

@@ -1,8 +1,8 @@
-// lib/constants.ts
 export const PAGES = {
   HOME: "/",
   CRUD: "/crud",
   GUESTBOOK: "/guestbook",
+  ADMIN_GUESTBOOK: "/admin/guestbook",
 } as const;
 
 export const SECTION_IDS = {
@@ -19,6 +19,7 @@ export const SECTION_IDS = {
   // Special pages
   CRUD: "crud",
   GUESTBOOK: "guestbook",
+  ADMIN_GUESTBOOK: "admin-guestbook",
 } as const;
 
 export type PageType = (typeof PAGES)[keyof typeof PAGES];
