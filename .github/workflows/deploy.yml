@@ -7,6 +7,11 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      NEXT_PUBLIC_ADMIN_PASSWORD: ${{ secrets.NEXT_PUBLIC_ADMIN_PASSWORD }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
     steps:
       - name: 📦 Checkout Code
@@ -21,22 +26,12 @@ jobs:
       - name: 📥 Install Dependencies
         run: npm ci
 
-      - name: 🔨 Build Next.js (WITH DEBUG)
+      - name: 🔨 Build Next.js
         run: |
           echo "🔧 Building with env variables..."
-          echo "Supabase URL length: ${#NEXT_PUBLIC_SUPABASE_URL}"
           npm run build
-          echo "📁 Build output structure:"
-          find .next -type f -name "*.js" | head -5 || echo "No JS files in .next"
-          ls -la .next/ || echo "No .next directory"
-        env:
-          CI: false
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          NEXT_PUBLIC_ADMIN_PASSWORD: ${{ secrets.NEXT_PUBLIC_ADMIN_PASSWORD }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
-      - name: 📤 Upload ALL Files (FIX)
+      - name: 📤 Upload Project Files
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPSHOST }}
@@ -46,9 +41,8 @@ jobs:
           target: "/root/PORTFOLIO-2025"
           overwrite: true
           rm: true
-          strip_components: 0
 
-      - name: 🐳 Restart Docker
+      - name: 🐳 Build & Run Docker Container on Server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPSHOST }}
@@ -56,37 +50,36 @@ jobs:
           password: ${{ secrets.VPSPASS }}
           script: |
             echo "🚀 Deploying..."
-            cd /root
+            cd /root/PORTFOLIO-2025
 
-            # Hapus folder lama
-            rm -rf PORTFOLIO-2025
-
-            # Clone fresh dari GitHub (PAKAI TOKEN AUTH)
-            git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/AdrianAlfauzan/PORTFOLIO-2025.git
-            cd PORTFOLIO-2025
-
-            # Buat .env.production
-            cat > .env.production << EOF
-            NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-            NEXT_PUBLIC_ADMIN_PASSWORD=${{ secrets.NEXT_PUBLIC_ADMIN_PASSWORD }}
-            SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+            # Create .env.production from GitHub Secrets
+            cat > .env.production << 'EOF'
+            NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+            NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+            NEXT_PUBLIC_ADMIN_PASSWORD=$NEXT_PUBLIC_ADMIN_PASSWORD
+            SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY
             EOF
 
-            # Hapus container & image lama
+            # Stop and remove old container
             docker stop portfolio-2025 2>/dev/null || true
             docker rm portfolio-2025 2>/dev/null || true
             docker rmi portfolio-app 2>/dev/null || true
 
-            # Build dan run
+            # Build image from the UPLOADED files in the current directory
             docker build -t portfolio-app --no-cache .
-            docker run -dp 8888:8888 \
+
+            # Run the new container
+            docker run -d \
+              -p 8888:8888 \
               --name portfolio-2025 \
               --restart always \
+              --env-file .env.production \
               portfolio-app
 
-            echo "✅ Deployed! https://portfolio.domaicuan.my.id"
+            echo "✅ Container deployed!"
             echo "📊 Status:"
-            docker ps | grep portfolio
-            echo "🌐 Testing website:"
-            curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" http://localhost:8888
+            docker ps --filter "name=portfolio-2025"
+            echo "⏳ Waiting for app to be ready..."
+            sleep 15
+            echo "🌐 Final test:"
+            curl -f http://localhost:8888 && echo "Website is UP!" || echo "Website check failed"
