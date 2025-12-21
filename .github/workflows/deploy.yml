@@ -1,4 +1,4 @@
-name: 🚀 Deploy Portfolio to VPS
+name: 🚀 Deploy Portfolio
 
 on:
   push:
@@ -21,63 +21,51 @@ jobs:
       - name: 📥 Install Dependencies
         run: npm ci
 
-      - name: 🔨 Build Next.js (DENGAN SUPABASE ENV)
-        run: npm run build
+      - name: 🔨 Build Next.js (WITH DEBUG)
+        run: |
+          echo "🔧 Building with env variables..."
+          echo "Supabase URL length: ${#NEXT_PUBLIC_SUPABASE_URL}"
+          npm run build
+          echo "📁 Build output structure:"
+          find .next -type f -name "*.js" | head -5 || echo "No JS files in .next"
+          ls -la .next/ || echo "No .next directory"
         env:
           CI: false
-          # 🔑 SUPABASE & ENV VARIABLES (WAJIB DITAMBAH!)
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_ADMIN_PASSWORD: ${{ secrets.NEXT_PUBLIC_ADMIN_PASSWORD }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
-      - name: 📤 Upload to VPS
+      - name: 📤 Upload ALL Files (FIX)
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPSHOST }}
           username: ${{ secrets.VPSUSER }}
           password: ${{ secrets.VPSPASS }}
-          source: |
-            .next/
-            public/
-            package.json
-            package-lock.json
+          source: "."
           target: "/root/PORTFOLIO-2025"
+          overwrite: true
+          rm: true
 
-      - name: 🐳 Restart Docker Container (PAKAI INI!)
+      - name: 🐳 Restart Docker
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPSHOST }}
           username: ${{ secrets.VPSUSER }}
           password: ${{ secrets.VPSPASS }}
           script: |
-            echo "🚀 Deploying with Docker..."
-
+            echo "🚀 Deploying..."
             cd /root/PORTFOLIO-2025
 
-            # 🛑 HENTIKAN: Jangan pakai PM2/npm start lagi!
-            # 🐳 PAKAI DOCKER SAJA (sudah jalan di container 'portfolio-2025')
-
-            # 1. Stop container lama
+            # Cleanup old
             docker stop portfolio-2025 2>/dev/null || true
             docker rm portfolio-2025 2>/dev/null || true
 
-            # 2. Build image baru dengan env variables
+            # Build & Run
             docker build -t portfolio-app .
-
-            # 3. Run container baru
-            docker run -d \
-              -p 8888:8888 \
+            docker run -dp 8888:8888 \
               --name portfolio-2025 \
               --restart always \
-              -e NEXT_PUBLIC_SUPABASE_URL="${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" \
-              -e NEXT_PUBLIC_SUPABASE_ANON_KEY="${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" \
-              -e NEXT_PUBLIC_ADMIN_PASSWORD="${{ secrets.NEXT_PUBLIC_ADMIN_PASSWORD }}" \
-              -e SUPABASE_SERVICE_ROLE_KEY="${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
               portfolio-app
 
-            # 4. Cek status
-            sleep 5
-            docker ps
-            echo "✅ Docker container restarted!"
-            echo "🌐 https://portfolio.domaicuan.my.id"
+            echo "✅ Deployed! https://portfolio.domaicuan.my.id"
