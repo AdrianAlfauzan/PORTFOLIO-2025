@@ -54,7 +54,7 @@ jobs:
 
             # 5.2 Create deployment directory
             echo "📁 Creating deployment folder..."
-            DEPLOY_DIR="/var/www/portfolio"
+            DEPLOY_DIR="/var/www/portfolio-2025"
             mkdir -p $DEPLOY_DIR
 
             # 5.3 Clean old files
@@ -74,7 +74,7 @@ jobs:
             .next/static/**
             public/**
             package.json
-          target: "/var/www/portfolio"
+          target: "/var/www/portfolio-2025"
           strip_components: 0
 
       # 7. Configure Nginx & Start
