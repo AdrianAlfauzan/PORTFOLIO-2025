@@ -21,10 +21,15 @@ jobs:
       - name: 📥 Install Dependencies
         run: npm ci
 
-      - name: 🔨 Build Next.js
+      - name: 🔨 Build Next.js (DENGAN SUPABASE ENV)
         run: npm run build
         env:
           CI: false
+          # 🔑 SUPABASE & ENV VARIABLES (WAJIB DITAMBAH!)
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_ADMIN_PASSWORD: ${{ secrets.NEXT_PUBLIC_ADMIN_PASSWORD }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
       - name: 📤 Upload to VPS
         uses: appleboy/scp-action@v0.1.7
@@ -37,38 +42,42 @@ jobs:
             public/
             package.json
             package-lock.json
-            next.config.*
-          target: "/root/PORTFOLIO-2025" # ✅ INI YANG BENAR!
+          target: "/root/PORTFOLIO-2025"
 
-      - name: 🚀 Restart Next.js
+      - name: 🐳 Restart Docker Container (PAKAI INI!)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPSHOST }}
           username: ${{ secrets.VPSUSER }}
           password: ${{ secrets.VPSPASS }}
           script: |
-            echo "🚀 Starting deployment..."
+            echo "🚀 Deploying with Docker..."
 
-            cd /root/PORTFOLIO-2025  # ✅ INI YANG BENAR!
+            cd /root/PORTFOLIO-2025
 
-            # Install dependencies
-            npm ci --production
+            # 🛑 HENTIKAN: Jangan pakai PM2/npm start lagi!
+            # 🐳 PAKAI DOCKER SAJA (sudah jalan di container 'portfolio-2025')
 
-            # Install PM2 if needed
-            if ! command -v pm2 &> /dev/null; then
-              npm install -g pm2
-            fi
+            # 1. Stop container lama
+            docker stop portfolio-2025 2>/dev/null || true
+            docker rm portfolio-2025 2>/dev/null || true
 
-            # Stop old process
-            pm2 stop portfolio 2>/dev/null || true
-            pm2 delete portfolio 2>/dev/null || true
+            # 2. Build image baru dengan env variables
+            docker build -t portfolio-app .
 
-            # Start Next.js on PORT 8888
-            PORT=8888 pm2 start npm --name "portfolio" -- start
+            # 3. Run container baru
+            docker run -d \
+              -p 8888:8888 \
+              --name portfolio-2025 \
+              --restart always \
+              -e NEXT_PUBLIC_SUPABASE_URL="${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" \
+              -e NEXT_PUBLIC_SUPABASE_ANON_KEY="${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" \
+              -e NEXT_PUBLIC_ADMIN_PASSWORD="${{ secrets.NEXT_PUBLIC_ADMIN_PASSWORD }}" \
+              -e SUPABASE_SERVICE_ROLE_KEY="${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+              portfolio-app
 
-            # Save PM2
-            pm2 save
-
-            echo "✅ Deployment completed!"
-            echo "🌐 Website: https://portfolio.domaicuan.my.id"
-            echo "📊 Check: pm2 status"
+            # 4. Cek status
+            sleep 5
+            docker ps
+            echo "✅ Docker container restarted!"
+            echo "🌐 https://portfolio.domaicuan.my.id"
