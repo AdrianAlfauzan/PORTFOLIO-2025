@@ -3,159 +3,140 @@ name: 🚀 Deploy Portfolio to VPS
 on:
   push:
     branches: [main]
-  workflow_dispatch: # Untuk trigger manual dari GitHub
+  workflow_dispatch: # Untuk trigger manual
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout kode
-      - name: 📦 Checkout Repository
+      # 1. Checkout code
+      - name: 📦 Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Setup Node.js
+      # 2. Setup Node.js 22 (Next.js butuh ≥20)
       - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22" # PASTIKAN 22 atau 20
           cache: "npm"
 
-      # 3. Install dependencies & build
-      - name: 📥 Install & Build
+      # 3. Install dependencies
+      - name: 📥 Install Dependencies
+        run: npm ci
+
+      # 4. Build project (Next.js/React)
+      - name: 🔨 Build Project
         run: |
-          npm ci
           npm run build
+          echo "✅ Build completed!"
+
+          # Cek struktur build folder
+          echo "📁 Build structure:"
+          ls -la .next/ || ls -la build/ || echo "No build folder found"
         env:
           CI: false
 
-      # 4. Deploy ke VPS
+      # 5. Deploy to VPS
       - name: 🚀 Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPSHOST }}
           username: ${{ secrets.VPSUSER }}
           password: ${{ secrets.VPSPASS }}
-          port: 22
           script: |
             echo "=== 🚀 STARTING DEPLOYMENT ==="
 
-            # Buat folder jika belum ada
-            mkdir -p /root/PORTFOLIO-2025
+            # 5.1 Update & Install Nginx
+            echo "📦 Updating system..."
+            apt update -y
+            apt install nginx -y
 
-            # Buat file HTML sederhana dulu untuk test
-            cat > /root/PORTFOLIO-2025/index.html << 'EOF'
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>PORTFOLIO 2025 - Deployed!</title>
-                <style>
-                    body {
-                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                        color: white;
-                        text-align: center;
-                        padding: 100px 20px;
-                        min-height: 100vh;
-                        margin: 0;
-                    }
-                    .container {
-                        max-width: 800px;
-                        margin: 0 auto;
-                        background: rgba(255, 255, 255, 0.1);
-                        backdrop-filter: blur(10px);
-                        padding: 40px;
-                        border-radius: 20px;
-                        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-                    }
-                    h1 {
-                        font-size: 3em;
-                        margin-bottom: 20px;
-                        color: #fff;
-                    }
-                    .status {
-                        background: #4CAF50;
-                        padding: 10px 30px;
-                        border-radius: 50px;
-                        display: inline-block;
-                        margin: 20px 0;
-                        font-weight: bold;
-                    }
-                    .info {
-                        text-align: left;
-                        background: rgba(255, 255, 255, 0.15);
-                        padding: 20px;
-                        border-radius: 10px;
-                        margin-top: 30px;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h1>🚀 PORTFOLIO 2025</h1>
-                    <div class="status">✅ DEPLOYMENT SUCCESSFUL!</div>
-                    <p>Your website has been successfully deployed via GitHub Actions CI/CD</p>
-                    
-                    <div class="info">
-                        <h3>📊 Deployment Info:</h3>
-                        <p><strong>Server IP:</strong> 72.61.215.194</p>
-                        <p><strong>Deployed at:</strong> $(date)</p>
-                        <p><strong>Powered by:</strong> GitHub Actions + VPS</p>
-                        <p><strong>Next:</strong> React build will be deployed here</p>
-                    </div>
-                    
-                    <div style="margin-top: 40px;">
-                        <p>🎉 Congratulations! Your CI/CD pipeline is working!</p>
-                    </div>
-                </div>
-            </body>
-            </html>
-            EOF
+            # 5.2 Create deployment directory
+            echo "📁 Creating deployment folder..."
+            DEPLOY_DIR="/var/www/portfolio"
+            mkdir -p $DEPLOY_DIR
 
-            echo "✅ Basic HTML deployed!"
+            # 5.3 Clean old files
+            rm -rf $DEPLOY_DIR/*
 
-            # Install Nginx jika belum ada
-            if ! command -v nginx &> /dev/null; then
-                echo "📦 Installing Nginx..."
-                apt update && apt install nginx -y
-            fi
+            echo "✅ VPS ready for file upload..."
 
-            # Setup Nginx configuration
+      # 6. Upload files to VPS
+      - name: 📤 Upload Files
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPSHOST }}
+          username: ${{ secrets.VPSUSER }}
+          password: ${{ secrets.VPSPASS }}
+          source: |
+            .next/standalone/**
+            .next/static/**
+            public/**
+            package.json
+          target: "/var/www/portfolio"
+          strip_components: 0
+
+      # 7. Configure Nginx & Start
+      - name: 🔧 Configure Nginx
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPSHOST }}
+          username: ${{ secrets.VPSUSER }}
+          password: ${{ secrets.VPSPASS }}
+          script: |
             echo "🔧 Configuring Nginx..."
+
+            # 7.1 Create Nginx config
             cat > /etc/nginx/sites-available/portfolio << 'EOF'
             server {
                 listen 80;
                 server_name 72.61.215.194;
-                
-                root /root/PORTFOLIO-2025;
+                root /var/www/portfolio;
                 index index.html;
                 
-                location / {
-                    try_files $uri $uri/ /index.html;
-                }
-                
-                # Cache static assets
-                location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
-                    expires 1y;
-                    add_header Cache-Control "public, immutable";
-                }
+                # Gzip compression
+                gzip on;
+                gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
                 
                 # Security headers
                 add_header X-Frame-Options "SAMEORIGIN" always;
                 add_header X-Content-Type-Options "nosniff" always;
                 add_header X-XSS-Protection "1; mode=block" always;
+                
+                # Cache static files
+                location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+                    expires 1y;
+                    add_header Cache-Control "public, immutable";
+                }
+                
+                # Next.js static folder
+                location /_next/static {
+                    alias /var/www/portfolio/.next/static;
+                    expires 365d;
+                    add_header Cache-Control "public, immutable";
+                }
+                
+                # Handle React Router / Next.js
+                location / {
+                    try_files $uri $uri/ /index.html;
+                }
             }
             EOF
 
-            # Aktifkan configuration
+            # 7.2 Enable site
             ln -sf /etc/nginx/sites-available/portfolio /etc/nginx/sites-enabled/
             rm -f /etc/nginx/sites-enabled/default
 
-            # Test dan restart Nginx
-            nginx -t && systemctl restart nginx
+            # 7.3 Set permissions
+            chown -R www-data:www-data /var/www/portfolio
+            chmod -R 755 /var/www/portfolio
 
-            echo "=== ✅ DEPLOYMENT COMPLETED ==="
+            # 7.4 Test & restart
+            nginx -t
+            systemctl restart nginx
+
+            echo "=== ✅ DEPLOYMENT COMPLETE ==="
             echo "🌐 Website: http://72.61.215.194"
             echo "🕐 Time: $(date)"
+            echo "📊 Check status: systemctl status nginx"
