@@ -1,142 +1,77 @@
-name: 🚀 Deploy Portfolio to VPS
+name: 🚀 Deploy to Domain
 
 on:
   push:
     branches: [main]
-  workflow_dispatch: # Untuk trigger manual
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout code
-      - name: 📦 Checkout Code
+      - name: 📦 Checkout
         uses: actions/checkout@v4
 
-      # 2. Setup Node.js 22 (Next.js butuh ≥20)
-      - name: ⚙️ Setup Node.js
+      - name: ⚙️ Setup Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: "20" # PASTIKAN 22 atau 20
+          node-version: "22"
           cache: "npm"
 
-      # 3. Install dependencies
-      - name: 📥 Install Dependencies
-        run: npm ci
-
-      # 4. Build project (Next.js/React)
-      - name: 🔨 Build Project
+      - name: 📥 Install & Build
         run: |
+          npm ci
           npm run build
-          echo "✅ Build completed!"
+          echo "✅ Build completed"
 
-          # Cek struktur build folder
-          echo "📁 Build structure:"
-          ls -la .next/ || ls -la build/ || echo "No build folder found"
-        env:
-          CI: false
+          # Cek output Next.js
+          if [ -d ".next" ]; then
+            echo "📁 Next.js build: .next/"
+            ls -la .next/
+          fi
 
-      # 5. Deploy to VPS
-      - name: 🚀 Deploy to VPS
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPSHOST }}
-          username: ${{ secrets.VPSUSER }}
-          password: ${{ secrets.VPSPASS }}
-          script: |
-            echo "=== 🚀 STARTING DEPLOYMENT ==="
-
-            # 5.1 Update & Install Nginx
-            echo "📦 Updating system..."
-            apt update -y
-            apt install nginx -y
-
-            # 5.2 Create deployment directory
-            echo "📁 Creating deployment folder..."
-            DEPLOY_DIR="/var/www/portfolio-2025"
-            mkdir -p $DEPLOY_DIR
-
-            # 5.3 Clean old files
-            rm -rf $DEPLOY_DIR/*
-
-            echo "✅ VPS ready for file upload..."
-
-      # 6. Upload files to VPS
-      - name: 📤 Upload Files
+      - name: 📤 Upload to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPSHOST }}
           username: ${{ secrets.VPSUSER }}
           password: ${{ secrets.VPSPASS }}
           source: |
-            .next/standalone/**
-            .next/static/**
-            public/**
+            .next/
+            public/
             package.json
+            package-lock.json
           target: "/var/www/portfolio-2025"
-          strip_components: 0
 
-      # 7. Configure Nginx & Start
-      - name: 🔧 Configure Nginx
+      - name: 🚀 Restart Next.js on VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPSHOST }}
           username: ${{ secrets.VPSUSER }}
           password: ${{ secrets.VPSPASS }}
           script: |
-            echo "🔧 Configuring Nginx..."
+            echo "🚀 Restarting Next.js..."
 
-            # 7.1 Create Nginx config
-            cat > /etc/nginx/sites-available/portfolio << 'EOF'
-            server {
-                listen 80;
-                server_name 72.61.215.194;
-                root /var/www/portfolio;
-                index index.html;
-                
-                # Gzip compression
-                gzip on;
-                gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
-                
-                # Security headers
-                add_header X-Frame-Options "SAMEORIGIN" always;
-                add_header X-Content-Type-Options "nosniff" always;
-                add_header X-XSS-Protection "1; mode=block" always;
-                
-                # Cache static files
-                location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
-                    expires 1y;
-                    add_header Cache-Control "public, immutable";
-                }
-                
-                # Next.js static folder
-                location /_next/static {
-                    alias /var/www/portfolio/.next/static;
-                    expires 365d;
-                    add_header Cache-Control "public, immutable";
-                }
-                
-                # Handle React Router / Next.js
-                location / {
-                    try_files $uri $uri/ /index.html;
-                }
-            }
-            EOF
+            cd /var/www/portfolio-2025
 
-            # 7.2 Enable site
-            ln -sf /etc/nginx/sites-available/portfolio /etc/nginx/sites-enabled/
-            rm -f /etc/nginx/sites-enabled/default
+            # Install dependencies
+            npm ci --production
 
-            # 7.3 Set permissions
-            chown -R www-data:www-data /var/www/portfolio
-            chmod -R 755 /var/www/portfolio
+            # Install PM2 jika belum
+            if ! command -v pm2 &> /dev/null; then
+              npm install -g pm2
+            fi
 
-            # 7.4 Test & restart
-            nginx -t
-            systemctl restart nginx
+            # Stop process lama
+            pm2 stop portfolio 2>/dev/null || true
+            pm2 delete portfolio 2>/dev/null || true
 
-            echo "=== ✅ DEPLOYMENT COMPLETE ==="
-            echo "🌐 Website: http://72.61.215.194"
-            echo "🕐 Time: $(date)"
-            echo "📊 Check status: systemctl status nginx"
+            # Start Next.js di PORT 8888
+            PORT=8888 pm2 start npm --name "portfolio" -- start
+
+            # Save PM2
+            pm2 save
+
+            echo "✅ Next.js running on port 8888"
+            echo "🌐 Domain: https://portfolio.domaicuan.my.id"
+            echo "📊 Check: pm2 status"
