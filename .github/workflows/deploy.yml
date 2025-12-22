@@ -20,25 +20,18 @@ jobs:
           host: ${{ secrets.VPSHOST }}
           username: ${{ secrets.VPSUSER }}
           password: ${{ secrets.VPSPASS }}
-          # HAPUS SEMUA timeout line! Biarin default
+          fingerprint: "ignore"
           script: |
-            echo "🚀 Starting deployment..."
+            echo "🚀 Starting deployment with docker-compose..."
             cd /root/PORTFOLIO-2025
 
             echo "📥 Pulling latest code..."
             git fetch origin        
             git reset --hard origin/main
 
-            echo "🧹 Cleaning old containers..."
-            docker stop portfolio-2025 2>/dev/null || true
-            docker rm portfolio-2025 2>/dev/null || true
-            docker rmi portfolio-app 2>/dev/null || true
-
-            echo "🏗️ Building Docker image..."
-            docker build -t portfolio-app .
-
-            echo "🚀 Running container..."
-            docker run -dp 8888:8888 --name portfolio-2025 --restart always portfolio-app
+            echo "🏗️ Rebuilding with docker-compose..."
+            docker-compose down --rmi all --volumes --remove-orphans
+            docker-compose up -d --build
 
             echo "✅ Deployment complete!"
 
