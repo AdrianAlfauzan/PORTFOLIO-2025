@@ -6,11 +6,10 @@ COPY package*.json ./
 COPY package-lock.json ./
 RUN npm ci --verbose
 
-# 🔑 Ini kuncinya: .env.production → .env.local
+# 🔑 Salin .env.production → .env.local (Next.js otomatis baca saat build)
 COPY .env.production ./.env.local
 
 COPY . .
-
 RUN npm run build
 
 # Production stage
@@ -28,9 +27,6 @@ COPY --from=builder /app/.env.production ./.env.local
 RUN chown -R nextjs:nodejs /app
 USER nextjs
 
-ENV PORT=8888
-ENV HOSTNAME="0.0.0.0"
-ENV NODE_ENV=production
-
+ENV PORT=8888 HOSTNAME=0.0.0.0 NODE_ENV=production
 EXPOSE 8888
 CMD ["node", "server.js"]
