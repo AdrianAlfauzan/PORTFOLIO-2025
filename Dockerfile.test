@@ -1,0 +1,21 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+COPY package-lock.json ./
+COPY .env.production ./
+COPY . .
+
+RUN npm ci --verbose
+
+# Build langsung
+RUN NEXT_PUBLIC_SUPABASE_URL=https://yifpjnoneybyhqxhssip.supabase.co \
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_78Iv4CCuI0eS0tNHPyH-uw_FNYB6j3E \
+    NEXT_PUBLIC_ADMIN_PASSWORD=adrian123 \
+    SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpZnBqbm9uZXlieWhxeGhzc2lwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjA2MDk3NSwiZXhwIjoyMDgxNjM2OTc1fQ.YRyTxdAjnp50CasRTwrjWWYWw5MLYRZMi4bXgIQtp5I \
+    npm run build
+
+EXPOSE 8888
+
+CMD ["node", "server.js"]

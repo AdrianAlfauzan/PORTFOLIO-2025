@@ -1,8 +1,10 @@
-import type { NextConfig } from "next";
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // HAPUS atau COMMENT baris ini:
+  // output: 'export',
+  
+  // Atau ganti jadi 'standalone' kalo mau pake next start:
+  output: 'standalone',
+}
 
-const nextConfig: NextConfig = {
-  output: "export",
-  /* config options here */
-};
-
-export default nextConfig;
+export default nextConfig
