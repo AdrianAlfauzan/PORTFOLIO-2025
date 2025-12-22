@@ -6,9 +6,6 @@ COPY package*.json ./
 COPY package-lock.json ./
 RUN npm ci --verbose
 
-# 🔑 Salin .env.production → .env.local (Next.js otomatis baca saat build)
-COPY .env.production ./.env.local
-
 COPY . .
 RUN npm run build
 
@@ -22,7 +19,9 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/.env.production ./.env.local
+
+# Salin .env.production ke runtime (untuk server.js)
+COPY .env.production ./.env.local
 
 RUN chown -R nextjs:nodejs /app
 USER nextjs
