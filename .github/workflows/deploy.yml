@@ -20,7 +20,6 @@ jobs:
           host: ${{ secrets.VPSHOST }}
           username: ${{ secrets.VPSUSER }}
           password: ${{ secrets.VPSPASS }}
-          fingerprint: ${{ secrets.SSH_HOST_FINGERPRINT }}
           script: |
             echo "🚀 Starting deployment with docker-compose..."
             cd /root/PORTFOLIO-2025
