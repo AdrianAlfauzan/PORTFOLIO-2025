@@ -1,55 +1,37 @@
 # Build stage
-FROM node:lts-alpine AS builder
-
-# Set working directory
+FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
 COPY package-lock.json ./
-
-# Install dependencies
 RUN npm ci --verbose
 
-# 🔥 COPY .env.production (akan dibuat di server)
-COPY .env.production ./
+# 🔑 Ini kuncinya: .env.production → .env.local
+COPY .env.production ./.env.local
 
-# Copy source code
 COPY . .
 
-# Build the application
+# Build langsung (Next.js otomatis baca .env.local)
 RUN npm run build
 
 # Production stage
-FROM node:18-alpine AS runner
-
+FROM node:20-alpine AS runner
 WORKDIR /app
 
-# Create non-root user
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy built application from builder stage
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/.env.production ./.env.local
 
-# 🔥 COPY .env.production untuk runtime
-COPY --from=builder /app/.env.production ./
-
-# Set correct permissions
 RUN chown -R nextjs:nodejs /app
-
-# Switch to non-root user
 USER nextjs
 
-# Expose port 8888
-EXPOSE 8888
-
-# Set environment variable
 ENV PORT=8888
 ENV HOSTNAME="0.0.0.0"
 ENV NODE_ENV=production
 
-# Start the application
+EXPOSE 8888
 CMD ["node", "server.js"]
