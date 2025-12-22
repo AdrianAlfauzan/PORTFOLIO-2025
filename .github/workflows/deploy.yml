@@ -7,34 +7,45 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v1
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          NEXT_PUBLIC_ADMIN_PASSWORD: ${{ secrets.NEXT_PUBLIC_ADMIN_PASSWORD }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         with:
           host: ${{ secrets.VPSHOST }}
           username: ${{ secrets.VPSUSER }}
           password: ${{ secrets.VPSPASS }}
           script: |
-            echo "🔁 Pulling latest code from GitHub..."
             cd /root/PORTFOLIO-2025
             git fetch origin
             git reset --hard origin/main
 
-            echo "🧹 Cleaning old containers..."
+            # Pastikan .env.production ada
+            if [ ! -f ".env.production" ]; then
+              echo "❌ ERROR: .env.production missing!"
+              exit 1
+            fi
+
             docker stop portfolio-2025 2>/dev/null || true
             docker rm portfolio-2025 2>/dev/null || true
             docker rmi portfolio-app 2>/dev/null || true
 
-            echo "🏗️ Building new image..."
-            docker build -t portfolio-app --no-cache .
+            # Build & langsung cek error
+            if ! docker build -t portfolio-app --no-cache .; then
+              echo "❌ BUILD FAILED"
+              exit 1
+            fi
 
-            echo "🚀 Running new container..."
-            docker run -dp 8888:8888 --name portfolio-2025 --restart always portfolio-app
+            docker run -dp 8888:8888 --name portfolio-2025 portfolio-app
+            sleep 10
 
-            echo "✅ Deployment complete!"
+            # Cek logs container
+            echo "=== CONTAINER LOGS ==="
+            docker logs portfolio-2025
+
+            # Cek response
+            if curl -s --max-time 10 http://localhost:8888 | grep -q "Adrian"; then
+              echo "✅ DEPLOY SUCCESS"
+            else
+              echo "❌ DEPLOY FAILED: Navbar not found"
+              exit 1
+            fi
