@@ -6,7 +6,7 @@ COPY package*.json ./
 COPY package-lock.json ./
 RUN npm ci --verbose
 
-# 🔑 Salin .env.production → .env.local (Next.js otomatis baca saat build)
+# 🔑 Ini kuncinya: .env.production → .env.local
 COPY .env.production ./.env.local
 
 COPY . .
