@@ -198,7 +198,7 @@ export default function Navbar() {
                 ) : (
                   <>
                     <User size={18} className="inline mr-2 align-middle" />
-                    Adrian BACKTO TEST
+                    Adrian TEST 2025
                   </>
                 )}
               </span>
