@@ -7,7 +7,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
 
     steps:
       - name: Deploy to VPS via SSH
@@ -21,8 +20,7 @@ jobs:
           host: ${{ secrets.VPSHOST }}
           username: ${{ secrets.VPSUSER }}
           password: ${{ secrets.VPSPASS }}
-          # HAPUS script_timeout
-          timeout: 1200 # 20 menit dalam detik
+          # HAPUS SEMUA timeout line! Biarin default
           script: |
             echo "🚀 Starting deployment..."
             cd /root/PORTFOLIO-2025
@@ -44,11 +42,6 @@ jobs:
 
             echo "✅ Deployment complete!"
 
-            # Cek perubahan
             sleep 10
             echo "🔍 Testing deployment..."
-            if curl -s http://localhost:8888 | grep -q "Adrian INI YANG BENAR"; then
-              echo "🎉 Update berhasil!"
-            else
-              echo "⚠️  Perubahan belum terlihat."
-            fi
+            curl -s http://localhost:8888 | grep -o "Adrian INI YANG BENAR" || echo "⚠️ Check browser manually"
