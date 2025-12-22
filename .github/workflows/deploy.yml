@@ -25,9 +25,11 @@ jobs:
             cd /root/PORTFOLIO-2025
 
             # Pull latest code
+            echo "=== Pulling latest code ==="
             git pull origin main
 
-            # 🔥 BUAT .env.production DI SERVER
+            # Buat .env.production (untuk COPY di Dockerfile)
+            echo "=== Creating .env.production ==="
             cat > .env.production << EOF
             NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
             NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -35,19 +37,25 @@ jobs:
             SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY
             EOF
 
-            echo "=== Verifikasi .env.production ==="
+            # Verifikasi
+            echo "=== Verifying .env.production ==="
             ls -la .env.production
-            echo "2 baris pertama:"
-            head -2 .env.production
+            echo "First line:"
+            head -1 .env.production
 
-            # Rebuild container
+            # Rebuild container dengan BUILD ARGS
             echo "=== Stopping old container ==="
             docker stop portfolio-2025 2>/dev/null || true
             docker rm portfolio-2025 2>/dev/null || true
             docker rmi portfolio-app 2>/dev/null || true
 
-            echo "=== Building new image ==="
-            docker build -t portfolio-app --no-cache .
+            echo "=== Building new image WITH BUILD ARGS ==="
+            docker build -t portfolio-app --no-cache \
+              --build-arg NEXT_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL" \
+              --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="$NEXT_PUBLIC_SUPABASE_ANON_KEY" \
+              --build-arg NEXT_PUBLIC_ADMIN_PASSWORD="$NEXT_PUBLIC_ADMIN_PASSWORD" \
+              --build-arg SUPABASE_SERVICE_ROLE_KEY="$SUPABASE_SERVICE_ROLE_KEY" \
+              .
 
             echo "=== Running container ==="
             docker run -dp 8888:8888 --name portfolio-2025 --restart always portfolio-app
@@ -56,7 +64,7 @@ jobs:
             sleep 5
 
             echo "=== Container status ==="
-            docker ps | grep portfolio || docker ps
+            docker ps
 
             echo "=== Testing website ==="
-            curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" http://localhost:8888 || echo "Curl failed"
+            curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" http://localhost:8888 || echo "Website test failed"
