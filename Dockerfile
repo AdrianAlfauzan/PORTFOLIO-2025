@@ -6,25 +6,10 @@ COPY package*.json ./
 COPY package-lock.json ./
 RUN npm ci --verbose
 
-# Copy .env.production (akan di-override oleh build args)
-COPY .env.production ./
+# 🔑 Ini kuncinya: .env.production → .env.local
+COPY .env.production ./.env.local
 
-# Copy source code
 COPY . .
-
-# BUILD ARGS untuk environment variables
-ARG NEXT_PUBLIC_SUPABASE_URL
-ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
-ARG NEXT_PUBLIC_ADMIN_PASSWORD
-ARG SUPABASE_SERVICE_ROLE_KEY
-
-# SET ENV VARIABLES (build args override .env.production)
-ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-ENV NEXT_PUBLIC_ADMIN_PASSWORD=${NEXT_PUBLIC_ADMIN_PASSWORD}
-ENV SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-ENV NODE_ENV=production
-ENV CI=false
 
 RUN npm run build
 
@@ -38,6 +23,7 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/.env.production ./.env.local
 
 RUN chown -R nextjs:nodejs /app
 USER nextjs

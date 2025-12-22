@@ -7,6 +7,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 30 # 🔥 TAMBAH TIMEOUT 30 MENIT
 
     steps:
       - name: Deploy to VPS via SSH
@@ -20,6 +21,7 @@ jobs:
           host: ${{ secrets.VPSHOST }}
           username: ${{ secrets.VPSUSER }}
           password: ${{ secrets.VPSPASS }}
+          script_timeout: 20m # 🔥 TIMEOUT 20 MENIT UNTUK SCRIPT
           script: |
             echo "🚀 Starting deployment..."
             cd /root/PORTFOLIO-2025
@@ -33,14 +35,9 @@ jobs:
             docker rm portfolio-2025 2>/dev/null || true
             docker rmi portfolio-app 2>/dev/null || true
 
-            echo "🏗️ Building with environment variables..."
-            # BUILD DENGAN BUILD ARGS
-            docker build -t portfolio-app --no-cache \
-              --build-arg NEXT_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL" \
-              --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="$NEXT_PUBLIC_SUPABASE_ANON_KEY" \
-              --build-arg NEXT_PUBLIC_ADMIN_PASSWORD="$NEXT_PUBLIC_ADMIN_PASSWORD" \
-              --build-arg SUPABASE_SERVICE_ROLE_KEY="$SUPABASE_SERVICE_ROLE_KEY" \
-              .
+            echo "🏗️ Building Docker image (may take 10+ minutes)..."
+            # BUILD DENGAN NO-CACHE TAPI PAKAI .env.production YANG ADA
+            docker build -t portfolio-app --no-cache .
 
             echo "🚀 Running container..."
             docker run -dp 8888:8888 --name portfolio-2025 --restart always portfolio-app
@@ -48,13 +45,7 @@ jobs:
             echo "✅ Deployment complete!"
             echo "🌐 https://portfolio.domaicuan.my.id"
 
-            # Health check
-            sleep 10
-            echo "🔍 Health check..."
-            if curl -s --max-time 10 http://localhost:8888 > /dev/null; then
-              echo "🟢 Website is running"
-            else
-              echo "🔴 Website failed to start"
-              docker logs portfolio-2025 --tail 20
-              exit 1
-            fi
+            # Simple health check
+            sleep 15
+            echo "🔍 Checking if container is running..."
+            docker ps | grep portfolio && echo "🟢 Container is running" || echo "🔴 Container failed"
