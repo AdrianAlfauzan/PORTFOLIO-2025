@@ -2,7 +2,9 @@ version: "3.8"
 
 services:
   portfolio:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: portfolio-2025
     restart: unless-stopped
     ports:
@@ -11,8 +13,19 @@ services:
       - .env.production
     environment:
       - NODE_ENV=production
-    volumes:
-      - ./public:/app/public:ro
+    # HEALTHCHECK buat auto-restart kalo mati
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "1"
     networks:
       - portfolio-network
 
