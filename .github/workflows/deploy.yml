@@ -7,7 +7,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 30 # 🔥 TAMBAH TIMEOUT 30 MENIT
+    timeout-minutes: 30
 
     steps:
       - name: Deploy to VPS via SSH
@@ -21,13 +21,14 @@ jobs:
           host: ${{ secrets.VPSHOST }}
           username: ${{ secrets.VPSUSER }}
           password: ${{ secrets.VPSPASS }}
-          script_timeout: 20m # 🔥 TIMEOUT 20 MENIT UNTUK SCRIPT
+          # HAPUS script_timeout
+          timeout: 1200 # 20 menit dalam detik
           script: |
             echo "🚀 Starting deployment..."
             cd /root/PORTFOLIO-2025
 
             echo "📥 Pulling latest code..."
-            git fetch origin
+            git fetch origin        
             git reset --hard origin/main
 
             echo "🧹 Cleaning old containers..."
@@ -35,17 +36,19 @@ jobs:
             docker rm portfolio-2025 2>/dev/null || true
             docker rmi portfolio-app 2>/dev/null || true
 
-            echo "🏗️ Building Docker image (may take 10+ minutes)..."
-            # BUILD DENGAN NO-CACHE TAPI PAKAI .env.production YANG ADA
-            docker build -t portfolio-app --no-cache .
+            echo "🏗️ Building Docker image..."
+            docker build -t portfolio-app .
 
             echo "🚀 Running container..."
             docker run -dp 8888:8888 --name portfolio-2025 --restart always portfolio-app
 
             echo "✅ Deployment complete!"
-            echo "🌐 https://portfolio.domaicuan.my.id"
 
-            # Simple health check
-            sleep 15
-            echo "🔍 Checking if container is running..."
-            docker ps | grep portfolio && echo "🟢 Container is running" || echo "🔴 Container failed"
+            # Cek perubahan
+            sleep 10
+            echo "🔍 Testing deployment..."
+            if curl -s http://localhost:8888 | grep -q "Adrian INI YANG BENAR"; then
+              echo "🎉 Update berhasil!"
+            else
+              echo "⚠️  Perubahan belum terlihat."
+            fi
