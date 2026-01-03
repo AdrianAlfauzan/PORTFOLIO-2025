@@ -1,10 +1,17 @@
+"use client";
+
 import { ReactNode } from "react";
 
+interface SectionWrapperProps {
+  children: ReactNode;
+  id?: string;
+  className?: string;
+}
 
-export default function SectionWrapper({ children }: { children: ReactNode }) {
-return (
-<section className="min-h-screen px-6 md:px-16 py-24 flex flex-col justify-center">
-{children}
-</section>
-);
+export default function SectionWrapper({ children, id, className = "" }: SectionWrapperProps) {
+  return (
+    <section id={id} className={`py-16 md:py-24 px-4 md:px-8 ${className}`}>
+      <div className="max-w-6xl mx-auto">{children}</div>
+    </section>
+  );
 }

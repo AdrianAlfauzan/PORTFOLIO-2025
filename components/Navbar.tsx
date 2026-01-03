@@ -162,7 +162,7 @@ export default function Navbar() {
   return (
     <>
       {/* ===== MAIN NAVBAR ===== */}
-      <motion.nav initial={{ y: -80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.6 }} className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-gradient-to-b from-gray-900/70 via-black/50 to-transparent">
+      <motion.nav initial={{ y: -80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.6 }} className="fixed top-0 left-0 right-0 z-10 backdrop-blur-md bg-gradient-to-b from-gray-900/70 via-black/50 to-transparent">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           {/* LEFT: Logo/Title */}
           <div className="flex items-center gap-4">

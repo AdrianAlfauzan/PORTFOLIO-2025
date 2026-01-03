@@ -138,7 +138,7 @@ export default function HeroSection() {
         <div className="absolute top-3/4 left-1/2 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse delay-500" />
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ amount: 0.6 }} transition={{ duration: 0.8 }} className="relative z-10 max-w-6xl w-full mt-8">
+      <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ amount: 0.6 }} transition={{ duration: 0.8 }} className="relative z-0 max-w-6xl w-full mt-8">
         {/* Main content card dengan backdrop blur lebih kuat */}
         <div className="rounded-3xl bg-gradient-to-br from-gray-900/80 to-black/80  p-8 md:p-12 border border-white/20 shadow-2xl overflow-hidden">
           {/* Animated border */}

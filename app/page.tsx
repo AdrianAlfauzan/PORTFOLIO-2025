@@ -19,7 +19,7 @@ export default function Home() {
       <BackgroundScene />
 
       {/* Content dengan backdrop blur untuk readability */}
-      <div className="relative z-10">
+      <div className="relative ">
         <WelcomeModal />
         <AnnouncementAlert />
 

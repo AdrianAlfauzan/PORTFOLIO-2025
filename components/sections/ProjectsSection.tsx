@@ -1,18 +1,40 @@
 "use client";
-
-import SectionWrapper from "../ui/SectionWrapper";
-import AnimatedTitle from "../ui/AnimatedTitle";
-import { projects } from "@/data/projects";
 import { motion, AnimatePresence } from "framer-motion";
-import { FolderOpen, X, ExternalLink, Github } from "lucide-react";
+import { FolderOpen, X, ExternalLink, Github, Figma, Calendar, Users, Code, Shield, Wifi, Brain, Cpu, Sparkles } from "lucide-react";
 import { useState } from "react";
 
+// OUR DATA & TYPES
+import { projects } from "@/data/projects";
+import { Project } from "@/types/projects";
+
+// OUR COMPONENTS
+import AnimatedTitle from "@/components/ui/AnimatedTitle";
+import SectionWrapper from "@/components/ui/SectionWrapper";
+
+// Category Icons Mapping
+const categoryIcons: Record<string, React.ReactNode> = {
+  // ← Fix type
+  "Mobile Development": <Cpu className="w-4 h-4" />,
+  "Web Development": <Code className="w-4 h-4" />,
+  "Real-time Apps": <Wifi className="w-4 h-4" />,
+  "Security Tools": <Shield className="w-4 h-4" />,
+  "IoT & AI": <Brain className="w-4 h-4" />,
+};
+
+// Status Colors
+const statusColors: Record<string, string> = {
+  completed: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
+  "in-progress": "bg-amber-500/10 text-amber-300 border-amber-500/20",
+  planned: "bg-blue-500/10 text-blue-300 border-blue-500/20",
+  archived: "bg-gray-500/10 text-gray-300 border-gray-500/20",
+};
+
 export default function ProjectsSection() {
-  const [selectedProject, setSelectedProject] = useState<number | null>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleProjectClick = (index: number) => {
-    setSelectedProject(index);
+  const handleProjectClick = (project: Project) => {
+    setSelectedProject(project);
     setIsModalOpen(true);
   };
 
@@ -22,8 +44,8 @@ export default function ProjectsSection() {
   };
 
   return (
-    <SectionWrapper>
-      <AnimatedTitle title="Projects" icon={FolderOpen} />
+    <SectionWrapper id="projects">
+      <AnimatedTitle title="Featured Projects" icon={FolderOpen} />
 
       <motion.div
         initial="hidden"
@@ -37,86 +59,130 @@ export default function ProjectsSection() {
         }}
         className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
       >
-        {projects.map((project, i) => (
-          <motion.button
-            key={project}
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              show: { opacity: 1, y: 0 },
-            }}
-            whileHover={{
-              y: -6,
-              transition: { type: "spring", stiffness: 300, damping: 20 },
-            }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => handleProjectClick(i)}
-            className="group relative rounded-2xl border border-white/10 bg-gradient-to-br from-zinc-900/70 to-black/60 backdrop-blur-xl p-6 w-full text-left cursor-pointer overflow-hidden focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-          >
-            {/* Click effect overlay */}
-            <motion.div className="absolute inset-0 bg-gradient-to-br from-[#1DB954]/0 to-transparent" whileHover={{ opacity: 0.1 }} transition={{ duration: 0.2 }} />
-
-            {/* Glow effect */}
-            <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-[#1DB954]/10 via-transparent to-transparent" />
-
-            {/* Ripple effect circle */}
-            <motion.div
-              className="absolute w-32 h-32 rounded-full bg-[#1DB954]/5 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-              initial={{ scale: 0, opacity: 0 }}
-              whileHover={{
-                scale: 2,
-                opacity: 1,
-                transition: { duration: 0.6, ease: "easeOut" },
+        {projects
+          .filter((p) => p.featured)
+          .map((project) => (
+            <motion.button
+              key={project.id}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                show: { opacity: 1, y: 0 },
               }}
-            />
+              whileHover={{
+                y: -6,
+                transition: { type: "spring", stiffness: 300, damping: 20 },
+              }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => handleProjectClick(project)}
+              className="group relative rounded-2xl border border-white/10 bg-gradient-to-br from-zinc-900/70 to-black/60 backdrop-blur-xl p-6 w-full text-left cursor-pointer overflow-hidden focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            >
+              {/* Featured Badge */}
+              {project.featured && (
+                <div className="absolute top-3 right-3 z-10">
+                  <div className="px-2 py-1 rounded-lg bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border border-yellow-500/30 flex items-center gap-1">
+                    <Sparkles size={12} className="text-yellow-300" />
+                    <span className="text-xs font-medium text-yellow-300">Featured</span>
+                  </div>
+                </div>
+              )}
 
-            <h3 className="relative text-lg font-semibold text-white">{project}</h3>
+              {/* Status Badge */}
+              <div className="absolute top-3 left-3 z-10">
+                <span className={`px-2 py-1 rounded-lg text-xs font-medium border ${statusColors[project.status]}`}>{project.status.charAt(0).toUpperCase() + project.status.slice(1)}</span>
+              </div>
 
-            <p className="relative mt-2 text-sm text-zinc-400">Experimental project crafted with modern web & mobile stack.</p>
+              {/* Click effect overlay */}
+              <motion.div className="absolute inset-0 bg-gradient-to-br from-[#1DB954]/0 to-transparent" whileHover={{ opacity: 0.1 }} transition={{ duration: 0.2 }} />
 
-            <div className="relative mt-4 flex items-center justify-between">
-              <span className="text-xs text-zinc-500">#{i + 1}</span>
+              {/* Glow effect */}
+              <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-[#1DB954]/10 via-transparent to-transparent" />
 
-              <motion.span
-                className="text-xs font-medium text-[#1DB954] flex items-center gap-1"
-                initial={{ opacity: 0, x: -10 }}
+              {/* Ripple effect circle */}
+              <motion.div
+                className="absolute w-32 h-32 rounded-full bg-[#1DB954]/5 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                initial={{ scale: 0, opacity: 0 }}
                 whileHover={{
+                  scale: 2,
                   opacity: 1,
-                  x: 0,
-                  transition: { duration: 0.2 },
+                  transition: { duration: 0.6, ease: "easeOut" },
                 }}
-              >
-                View details
+              />
+
+              {/* Project Icon/Image Placeholder */}
+              <div className="relative mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500/20 to-blue-500/20 flex items-center justify-center">{categoryIcons[project.category] || <Code className="w-6 h-6 text-emerald-300" />}</div>
+              </div>
+
+              <h3 className="relative text-lg font-semibold text-white">{project.name}</h3>
+              <p className="relative mt-1 text-sm text-emerald-400">{project.tagline}</p>
+              <p className="relative mt-3 text-sm text-zinc-400 line-clamp-2">{project.description}</p>
+
+              {/* Tech Stack Preview */}
+              <div className="relative mt-4 flex flex-wrap gap-1.5">
+                {project.techStack.slice(0, 3).map((tech) => (
+                  <span key={tech} className="px-2 py-1 text-xs rounded-full bg-white/5 text-zinc-300 border border-white/10">
+                    {tech}
+                  </span>
+                ))}
+                {project.techStack.length > 3 && <span className="px-2 py-1 text-xs rounded-full bg-white/5 text-zinc-400 border border-white/10">+{project.techStack.length - 3} more</span>}
+              </div>
+
+              {/* Footer */}
+              <div className="relative mt-6 flex items-center justify-between text-xs text-zinc-500">
+                <div className="flex items-center gap-3">
+                  <span className="flex items-center gap-1">
+                    <Calendar size={12} />
+                    {project.year}
+                  </span>
+                  {project.teamSize && (
+                    <span className="flex items-center gap-1">
+                      <Users size={12} />
+                      {project.teamSize} {project.teamSize === 1 ? "person" : "people"}
+                    </span>
+                  )}
+                </div>
+
                 <motion.span
-                  animate={{ x: [0, 4, 0] }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    ease: "easeInOut",
+                  className="text-xs font-medium text-[#1DB954] flex items-center gap-1"
+                  initial={{ opacity: 0, x: -10 }}
+                  whileHover={{
+                    opacity: 1,
+                    x: 0,
+                    transition: { duration: 0.2 },
                   }}
                 >
-                  →
+                  View details
+                  <motion.span
+                    animate={{ x: [0, 4, 0] }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  >
+                    →
+                  </motion.span>
                 </motion.span>
-              </motion.span>
-            </div>
-          </motion.button>
-        ))}
+              </div>
+            </motion.button>
+          ))}
       </motion.div>
 
-      {/* Modal with detailed project view */}
+      {/* ========== MODAL FIXED Z-INDEX ========== */}
       <AnimatePresence>
-        {isModalOpen && selectedProject !== null && (
+        {isModalOpen && selectedProject && (
           <>
-            {/* Backdrop - Klik di area ini juga bisa close */}
+            {/* Backdrop dengan z-index tinggi */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
               onClick={closeModal}
-              className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 cursor-pointer"
+              className="fixed inset-0 bg-black/80 backdrop-blur-md z-[9998] flex items-center justify-center p-4 cursor-pointer "
             />
 
-            {/* Modal content - Tidak menangkap klik untuk mencegah bubbling */}
+            {/* Modal content dengan z-index lebih tinggi */}
             <motion.div
               initial={{
                 opacity: 0,
@@ -140,36 +206,45 @@ export default function ProjectsSection() {
                 y: 50,
                 transition: { duration: 0.2 },
               }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
+              className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none "
             >
               <div
-                className="relative w-full max-w-2xl rounded-2xl border border-white/20 bg-gradient-to-br from-zinc-900 to-black backdrop-blur-2xl overflow-hidden pointer-events-auto"
-                onClick={(e) => e.stopPropagation()} // Stop klik dari bubbling ke backdrop
+                className="relative w-full max-w-4xl rounded-2xl border border-white/20 bg-gradient-to-br from-zinc-900 to-black backdrop-blur-2xl overflow-hidden pointer-events-auto max-h-[90vh] overflow-y-auto"
+                onClick={(e) => e.stopPropagation()}
               >
                 {/* Modal header */}
                 <motion.div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#1DB954] to-emerald-400" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.5, delay: 0.1 }} />
 
                 <div className="p-6 md:p-8">
                   <div className="flex items-start justify-between mb-6">
-                    <div>
-                      <motion.h2 className="text-2xl font-bold text-white" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                        {projects[selectedProject]}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium border ${statusColors[selectedProject.status]}`}>{selectedProject.status.charAt(0).toUpperCase() + selectedProject.status.slice(1)}</span>
+                        {selectedProject.featured && (
+                          <span className="px-3 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border border-yellow-500/30 text-yellow-300 flex items-center gap-1">
+                            <Sparkles size={14} />
+                            Featured
+                          </span>
+                        )}
+                      </div>
+
+                      <motion.h2 className="text-2xl md:text-3xl font-bold text-white" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                        {selectedProject.name}
                       </motion.h2>
-                      <motion.p className="text-emerald-400 mt-1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
-                        Full-stack Project
+                      <motion.p className="text-emerald-400 text-lg mt-1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+                        {selectedProject.tagline}
                       </motion.p>
                     </div>
 
-                    {/* Tombol close dengan z-index lebih tinggi */}
+                    {/* Tombol close */}
                     <motion.button
                       whileHover={{ scale: 1.1, rotate: 90 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={closeModal}
-                      className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors relative z-10 focus:outline-none focus:ring-2 focus:ring-white/50"
+                      className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors relative z-10 ml-4"
                       initial={{ opacity: 0, rotate: -90 }}
                       animate={{ opacity: 1, rotate: 0 }}
                       transition={{ delay: 0.2 }}
-                      aria-label="Close modal"
                     >
                       <X size={20} className="text-zinc-400" />
                     </motion.button>
@@ -177,62 +252,127 @@ export default function ProjectsSection() {
 
                   {/* Project content */}
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="space-y-6">
-                    <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                      <h3 className="text-lg font-semibold text-white mb-3">Project Details</h3>
-                      <p className="text-zinc-300">A sophisticated full-stack application built with modern technologies. This project demonstrates advanced features and clean architecture.</p>
+                    {/* Project info grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                        <h4 className="text-sm font-medium text-zinc-400 mb-2">Project Info</h4>
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-zinc-400">Category</span>
+                            <span className="text-white">{selectedProject.category}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-zinc-400">Year</span>
+                            <span className="text-white">{selectedProject.year}</span>
+                          </div>
+                          {selectedProject.role && (
+                            <div className="flex justify-between">
+                              <span className="text-zinc-400">Role</span>
+                              <span className="text-white">{selectedProject.role}</span>
+                            </div>
+                          )}
+                          {selectedProject.teamSize && (
+                            <div className="flex justify-between">
+                              <span className="text-zinc-400">Team Size</span>
+                              <span className="text-white">
+                                {selectedProject.teamSize} {selectedProject.teamSize === 1 ? "person" : "people"}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      <div className="md:col-span-2 p-4 rounded-xl bg-white/5 border border-white/10">
+                        <h4 className="text-sm font-medium text-zinc-400 mb-3">Description</h4>
+                        <p className="text-zinc-300 leading-relaxed">{selectedProject.description}</p>
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <motion.div className="p-4 rounded-xl bg-white/5 border border-white/10" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }}>
-                        <h4 className="text-sm font-medium text-zinc-400 mb-2">Tech Stack</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {["React", "Node.js", "TypeScript", "MongoDB", "Tailwind", "AWS"].map((tech) => (
-                            <span key={tech} className="px-3 py-1 text-xs rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                              {tech}
-                            </span>
-                          ))}
-                        </div>
-                      </motion.div>
+                    {/* Tech Stack */}
+                    <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                      <h4 className="text-sm font-medium text-zinc-400 mb-3">Tech Stack</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedProject.techStack.map((tech) => (
+                          <span key={tech} className="px-3 py-1.5 text-sm rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors">
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
 
-                      <motion.div className="p-4 rounded-xl bg-white/5 border border-white/10" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6 }}>
-                        <h4 className="text-sm font-medium text-zinc-400 mb-2">Features</h4>
-                        <ul className="space-y-1 text-sm text-zinc-300">
-                          <li className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                            Real-time updates
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                            Responsive design
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                            Authentication system
-                          </li>
+                    {/* Features & Challenges */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                        <h4 className="text-sm font-medium text-zinc-400 mb-3">Key Features</h4>
+                        <ul className="space-y-2">
+                          {selectedProject.features.map((feature, index) => (
+                            <li key={index} className="flex items-start gap-2 text-sm text-zinc-300">
+                              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 flex-shrink-0" />
+                              {feature}
+                            </li>
+                          ))}
                         </ul>
-                      </motion.div>
+                      </div>
+
+                      {selectedProject.challenges && selectedProject.challenges.length > 0 && (
+                        <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                          <h4 className="text-sm font-medium text-zinc-400 mb-3">Challenges & Solutions</h4>
+                          <ul className="space-y-2">
+                            {selectedProject.challenges.map((challenge, index) => (
+                              <li key={index} className="flex items-start gap-2 text-sm text-zinc-300">
+                                <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 flex-shrink-0" />
+                                {challenge}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
 
                     {/* Action buttons */}
-                    <motion.div className="flex gap-4 pt-4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
-                      <motion.a
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        href="#"
-                        className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-                      >
-                        <ExternalLink size={18} />
-                        Live Demo
-                      </motion.a>
-                      <motion.a
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        href="#"
-                        className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
-                      >
-                        <Github size={18} />
-                        Source Code
-                      </motion.a>
+                    <motion.div className="flex flex-col sm:flex-row gap-4 pt-4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
+                      {selectedProject.liveDemoUrl && (
+                        <motion.a
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          href={selectedProject.liveDemoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-medium transition-colors"
+                        >
+                          <ExternalLink size={18} />
+                          Live Demo
+                        </motion.a>
+                      )}
+
+                      {selectedProject.githubUrl && (
+                        <motion.a
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          href={selectedProject.githubUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium transition-colors"
+                        >
+                          <Github size={18} />
+                          Source Code
+                        </motion.a>
+                      )}
+
+                      {selectedProject.figmaUrl && (
+                        <motion.a
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          href={selectedProject.figmaUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 font-medium transition-colors border border-purple-500/20"
+                        >
+                          <Figma size={18} />
+                          Design
+                        </motion.a>
+                      )}
                     </motion.div>
                   </motion.div>
                 </div>
