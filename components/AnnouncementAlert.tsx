@@ -57,13 +57,17 @@ export default function AnnouncementAlert() {
 
   // Content announcement
   const announcementContent = {
-    title: "New Update Available!",
-    shortText: "Some friends stepped up, I still with the code and the rest of the struggle.",
-    fullText: `Di akhir tahun 2025 ini, perjalanan di dunia pemrograman mulai mencapai titik refleksi.  
+    title: "Year-End Reflection",
+    shortText: "As 2025 closes, we reflect on my coding journey and growth.",
+    fullText: `2025 has been a transformative year in our coding journey.  
 
-Beberapa dari devs akan menyentuh masa kelulusan, we seldom meet, cuz idk... maybe overwhelmed sama daily tasks masing-masing sampe nggak sempet commit haha.
-Well... see you again, mate.
-Thank you for being a part of this journey.`,
+    Some fellow developers are approaching graduation milestones,  
+    while others continue navigating their daily tech challenges.  
+
+    Though paths may diverge with busy schedules,  
+    the shared experiences and learnings remain valuable.  
+
+    Thank you for being part of this development journey.`,
   };
 
   return (

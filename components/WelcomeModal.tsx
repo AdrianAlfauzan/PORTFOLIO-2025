@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
-import { X, Sparkles, Rocket, Coffee, Star } from "lucide-react";
+import { X, Sparkles, Rocket, Coffee, Star, Github, ExternalLink } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 
@@ -22,6 +22,9 @@ export default function WelcomeModal() {
     scrollToElement("projects");
     closeModal();
   };
+
+  // URL GitHub Anda - GANTI dengan URL GitHub Anda sendiri
+  const githubUrl = "https://github.com/AdrianAlfauzan"; // ← Ganti dengan URL GitHub Anda
 
   if (typeof window !== "undefined" && window.location.pathname !== "/") {
     return null;
@@ -121,15 +124,14 @@ export default function WelcomeModal() {
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.3 }}
-                        className="p-4 rounded-xl bg-white/5 border border-emerald-500/10 hover:border-emerald-400/40 transition-colors group"
+                        className="p-4 rounded-xl bg-white/5 border border-emerald-500/10 hover:border-emerald-400/40 transition-colors group cursor-pointer"
+                        onClick={handleExploreProjects}
                       >
                         <div className="flex items-center gap-3">
                           <div className="p-2 rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-colors">
                             <Star className="text-emerald-300" size={18} />
                           </div>
-                          <button onClick={handleExploreProjects} className="text-sm font-medium text-white hover:text-emerald-300 transition-colors">
-                            Explore Projects
-                          </button>
+                          <span className="text-sm font-medium text-white group-hover:text-emerald-300 transition-colors">Explore Projects</span>
                         </div>
                       </motion.div>
 
@@ -147,25 +149,32 @@ export default function WelcomeModal() {
                         </div>
                       </motion.div>
 
-                      <motion.div
+                      {/* GitHub Connect Button */}
+                      <motion.a
+                        href={githubUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.5 }}
-                        className="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-white/30 transition-colors group md:col-span-1 col-span-2"
+                        className="p-4 rounded-xl bg-white/5 border border-purple-500/10 hover:border-purple-400/40 transition-colors group md:col-span-1 col-span-2 cursor-pointer"
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-white/10 group-hover:bg-white/20 transition-colors">
-                            <Sparkles className="text-white" size={18} />
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-purple-500/10 group-hover:bg-purple-500/20 transition-colors">
+                              <Github className="text-purple-300" size={18} />
+                            </div>
+                            <span className="text-sm font-medium text-white group-hover:text-purple-300 transition-colors">Connect</span>
                           </div>
-                          <span className="text-sm font-medium text-white">Connect</span>
+                          <ExternalLink size={16} className="text-purple-300 opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
-                      </motion.div>
+                      </motion.a>
                     </div>
 
                     {/* Tips */}
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="p-4 rounded-xl bg-gradient-to-r from-emerald-500/10 to-blue-500/10 border border-emerald-500/20">
                       <p className="text-sm text-zinc-300 text-center">
-                        <span className="font-semibold text-emerald-300">Tip:</span> Keep trying and trying, because no one will ever know the results and they certainly won&apos;t betray you!
+                        <span className="font-semibold text-emerald-300">Tips:</span> Keep trying and trying, because no one will ever know the results and they certainly won&apos;t betray you!
                       </p>
                     </motion.div>
 

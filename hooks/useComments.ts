@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
+
+// OUR TYPES
+import { GuestbookComment, StatsType, SupabaseGuestbookRow } from "@/types/guestbook";
+
+// OUR LIBRARIES
 import { supabase } from "@/lib/supabase";
-import {
-  GuestbookComment,
-  StatsType,
-  SupabaseGuestbookRow, // Import type baru yang sudah kita buat
-} from "@/types/guestbook";
+
+// OUR UTILS
 import { normalizeReactions } from "@/utils/reactions";
 
 export const useComments = () => {
