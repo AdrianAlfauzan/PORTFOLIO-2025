@@ -267,7 +267,7 @@ export default function ProjectsSection() {
                                 {/* Animated glowing dot */}
                                 <div className="relative">
                                   <div className="w-4 h-4 rounded-full bg-emerald-400 animate-pulse" />
-                                  <div className="absolute inset-0 w-4 h-4 rounded-full bg-emerald-400 animate-ping opacity-50" />
+                                  <div className="absolute inset-0 w-4 h-4 rounded-full bg-emerald-400  opacity-50" />
                                 </div>
                               </div>
                             </div>
@@ -346,7 +346,7 @@ export default function ProjectsSection() {
                                 {/* Animated glowing dot */}
                                 <div className="relative">
                                   <div className="w-4 h-4 rounded-full bg-blue-400 animate-pulse" />
-                                  <div className="absolute inset-0 w-4 h-4 rounded-full bg-blue-400 animate-ping opacity-50" />
+                                  <div className="absolute inset-0 w-4 h-4 rounded-full bg-blue-400  opacity-50" />
                                 </div>
                               </div>
                             </div>
@@ -376,7 +376,7 @@ export default function ProjectsSection() {
                               {/* Animated glowing dot */}
                               <div className="relative">
                                 <div className="w-4 h-4 rounded-full bg-amber-400 animate-pulse" />
-                                <div className="absolute inset-0 w-4 h-4 rounded-full bg-amber-400 animate-ping opacity-50" />
+                                <div className="absolute inset-0 w-4 h-4 rounded-full bg-amber-400  opacity-50" />
                               </div>
                             </div>
                           </div>
@@ -411,7 +411,7 @@ export default function ProjectsSection() {
                                 {/* Animated glowing dot */}
                                 <div className="relative">
                                   <div className="w-4 h-4 rounded-full bg-green-400 animate-pulse" />
-                                  <div className="absolute inset-0 w-4 h-4 rounded-full bg-green-400 animate-ping opacity-50" />
+                                  <div className="absolute inset-0 w-4 h-4 rounded-full bg-green-400  opacity-50" />
                                 </div>
                               </div>
                             </div>
@@ -448,7 +448,7 @@ export default function ProjectsSection() {
                                   {/* Animated glowing dot */}
                                   <div className="relative">
                                     <div className="w-4 h-4 rounded-full bg-orange-400 animate-pulse" />
-                                    <div className="absolute inset-0 w-4 h-4 rounded-full bg-orange-400 animate-ping opacity-50" />
+                                    <div className="absolute inset-0 w-4 h-4 rounded-full bg-orange-400  opacity-50" />
                                   </div>
                                 </div>
                               </div>

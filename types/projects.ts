@@ -22,7 +22,7 @@ export interface Project {
 
   // Status & dates
   status: "completed" | "in-progress" | "planned" | "archived";
-  year: number;
+  year: string | number;
   featured: boolean;
 
   // Additional info
