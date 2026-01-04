@@ -130,7 +130,7 @@ export default function HeroSection() {
   ];
 
   return (
-    <section className="min-h-screen flex items-center justify-center px-6 overflow-hidden relative pt-20 md:pt-24">
+    <section className="min-h-screen flex items-center justify-center px-6 overflow-hidden relative pt-16 md:pt-16">
       {/* Animated background particles - kurangi opacity */}
       <div className="absolute inset-0 overflow-hidden z-0 opacity-30">
         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />

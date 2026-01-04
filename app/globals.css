@@ -14,3 +14,30 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
 }
+
+/* ===== CUSTOM SCROLLBAR ===== */
+
+/* Scrollbar untuk seluruh aplikasi */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+/* Hilangkan tombol panah atas/bawah */
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #10b981, #3b82f6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #059669, #2563eb);
+}
