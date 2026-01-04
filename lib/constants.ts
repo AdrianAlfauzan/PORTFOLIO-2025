@@ -11,6 +11,7 @@ export const SECTION_IDS = {
   TOP_TOPICS: "top-topics",
   OBSESSION: "obsession",
   PROJECTS: "projects",
+  SIDE_PROJECTS: "side-projects",
   MONTHLY: "monthly",
   UNEXPECTED_QUESTION: "unexpected-question",
   SIGNATURE_STYLE: "signature-style",

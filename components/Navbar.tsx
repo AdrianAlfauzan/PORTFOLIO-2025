@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Sparkles, Command, ArrowLeft, ChevronDown, Home, Star, Target, FolderKanban, Calendar, HelpCircle, PenTool, Trophy, Database, User, MessageSquare, Users, Lock } from "lucide-react";
+import { Sparkles, Command, ArrowLeft, ChevronDown, Home, Star, Target, FolderKanban, Calendar, HelpCircle, PenTool, Trophy, Database, User, MessageSquare, Users, Lock, TestTube } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 
 // OUR LIBRARIES
@@ -24,6 +24,7 @@ const menuCategories = [
     icon: FolderKanban,
     items: [
       { label: "Projects", id: SECTION_IDS.PROJECTS, icon: FolderKanban },
+      { label: "Side Projects", id: SECTION_IDS.SIDE_PROJECTS, icon: TestTube },
       { label: "CRUD Demo", id: SECTION_IDS.CRUD, icon: Database },
     ],
   },
@@ -42,7 +43,7 @@ const menuCategories = [
     icon: Users,
     items: [
       { label: "Guestbook", id: SECTION_IDS.GUESTBOOK, icon: MessageSquare },
-      { label: "Admin Panel", id: SECTION_IDS.ADMIN_GUESTBOOK, icon: Lock }, // TAMBAHKAN INI
+      { label: "Admin Panel", id: SECTION_IDS.ADMIN_GUESTBOOK, icon: Lock },
     ],
   },
 ];

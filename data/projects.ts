@@ -80,6 +80,6 @@ export const projects: Project[] = [
     status: "completed",
     year: "2025 - 2026",
     featured: true,
-    teamSize: 5,
+    teamSize: 1,
   },
 ];

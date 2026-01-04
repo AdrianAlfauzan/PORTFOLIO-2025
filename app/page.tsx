@@ -11,6 +11,7 @@ import AchievementSection from "@/components/sections/AchievementSection";
 import WelcomeModal from "@/components/WelcomeModal";
 import AnnouncementAlert from "@/components/AnnouncementAlert";
 import BackgroundScene from "@/components/3d/BackgroundScene";
+import SideProjectsSection from "@/components/sections/SideProjectsSection";
 
 export default function Home() {
   return (
@@ -37,6 +38,10 @@ export default function Home() {
 
         <section id="projects">
           <ProjectsSection />
+        </section>
+
+        <section id="side-projects">
+          <SideProjectsSection />
         </section>
 
         <section id="monthly">

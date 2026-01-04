@@ -6,6 +6,7 @@ import { LucideIcon } from "lucide-react";
 type AnimatedTitleProps = {
   title: string;
   icon?: LucideIcon;
+  subtitle?: string;
 };
 
 export default function AnimatedTitle({ title, icon: Icon }: AnimatedTitleProps) {
