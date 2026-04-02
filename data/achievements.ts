@@ -19,7 +19,7 @@ export const achievements: Achievement[] = [
     date: "18 Juli 2024",
     role: "Backend Web Developer",
     description: "Membangun sistem monitoring kompetensi rescuer (SIMORE) untuk BASARNAS Provinsi Bengkulu.",
-    imagePath: "/assets/Images/SertiBASARNAS.png",
+    imagePath: "/assets/Images/SertiBasarnas.PNG",
     certificateNumber: "6 / (4K8KL - 2024)",
   },
   {

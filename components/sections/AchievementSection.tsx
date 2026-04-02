@@ -124,7 +124,7 @@ export default function AchievementSection() {
             {/* Certificate Image */}
             <div className="relative w-full rounded-xl overflow-hidden border border-white/10 bg-black/30">
               <div className="relative w-full aspect-[3/4] md:aspect-[4/3]">
-                <Image src={selectedAchievement.imagePath} alt={selectedAchievement.title} fill className="object-contain" sizes="(max-width: 768px) 100vw, 800px" />
+                <Image src={selectedAchievement.imagePath} alt={selectedAchievement.title} fill className="object-contain" sizes="(max-width: 768px) 100vw, 800px" loading="lazy" />
               </div>
             </div>
 

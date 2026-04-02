@@ -2,11 +2,12 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Sparkles, Command, ArrowLeft, ChevronDown, Home, Star, Target, FolderKanban, Calendar, HelpCircle, PenTool, Trophy, Database, User, MessageSquare, Users, Lock, TestTube } from "lucide-react";
+import { Sparkles, Command, ArrowLeft, ChevronDown, Home, Star, Target, FolderKanban, Calendar, HelpCircle, PenTool, Trophy, Database, User, MessageSquare, Users, Lock, TestTube, Globe } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 
 // OUR LIBRARIES
 import { PAGES, SECTION_IDS } from "@/lib/constants";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 // menuCategories
 const menuCategories = [
@@ -47,6 +48,7 @@ const menuCategories = [
     ],
   },
 ];
+
 // Helper function untuk menentukan page type
 const getPageType = (pathname: string): "home" | "crud" | "guestbook" | "admin" => {
   if (pathname === PAGES.CRUD) return "crud";
@@ -68,31 +70,25 @@ export default function Navbar() {
 
   // Smart navigation handler
   const handleNavClick = (sectionId: string) => {
-    // Close mobile menu and dropdowns
     setOpen(false);
     setActiveDropdown(null);
 
-    // Handle special pages (CRUD, Guestbook, Admin)
     if (sectionId === SECTION_IDS.CRUD || sectionId === SECTION_IDS.GUESTBOOK || sectionId === SECTION_IDS.ADMIN_GUESTBOOK) {
-      const targetPage = sectionId === SECTION_IDS.CRUD ? PAGES.CRUD : sectionId === SECTION_IDS.GUESTBOOK ? PAGES.GUESTBOOK : PAGES.ADMIN_GUESTBOOK; // Untuk admin
+      const targetPage = sectionId === SECTION_IDS.CRUD ? PAGES.CRUD : sectionId === SECTION_IDS.GUESTBOOK ? PAGES.GUESTBOOK : PAGES.ADMIN_GUESTBOOK;
 
       if (pathname === targetPage) {
-        // Already on the page, scroll to top
         window.scrollTo({ top: 0, behavior: "smooth" });
       } else {
-        // Navigate to the page
         router.push(targetPage);
       }
       return;
     }
 
-    // On special pages, clicking home items should go back to home
     if (currentPage !== "home") {
       router.push(`${PAGES.HOME}#${sectionId}`);
       return;
     }
 
-    // On Homepage, handle smooth scroll
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
@@ -102,17 +98,14 @@ export default function Navbar() {
     }
   };
 
-  // Di handleBackToHome, mungkin perlu handle dari admin:
   const handleBackToHome = () => {
     if (currentPage === "admin") {
-      // Dari admin bisa ke guestbook atau home
       router.push(PAGES.GUESTBOOK);
     } else {
       router.push(PAGES.HOME);
     }
   };
 
-  // Get page-specific styling
   const getPageStyle = () => {
     switch (currentPage) {
       case "crud":
@@ -145,7 +138,7 @@ export default function Navbar() {
           iconColor: "text-red-300",
           indicatorColor: "bg-red-400",
         };
-      default: // home
+      default:
         return {
           bgGradient: "from-emerald-500/10 to-blue-500/10",
           borderColor: "border-white/5",
@@ -206,7 +199,7 @@ export default function Navbar() {
             </motion.div>
           </div>
 
-          {/* CENTER: Desktop Menu dengan 3 Dropdown */}
+          {/* CENTER: Desktop Menu */}
           <div className="hidden md:flex items-center gap-4">
             {menuCategories.map((category) => (
               <div key={category.name} className="relative" onMouseEnter={() => setActiveDropdown(category.name)} onMouseLeave={() => setActiveDropdown(null)}>
@@ -216,7 +209,7 @@ export default function Navbar() {
                   className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all ${
                     activeDropdown === category.name ||
                     category.items.some(
-                      (item) => (item.id === SECTION_IDS.CRUD && currentPage === "crud") || (item.id === SECTION_IDS.GUESTBOOK && currentPage === "guestbook") || (item.id === SECTION_IDS.ADMIN_GUESTBOOK && currentPage === "admin")
+                      (item) => (item.id === SECTION_IDS.CRUD && currentPage === "crud") || (item.id === SECTION_IDS.GUESTBOOK && currentPage === "guestbook") || (item.id === SECTION_IDS.ADMIN_GUESTBOOK && currentPage === "admin"),
                     )
                       ? "bg-white/10 text-white"
                       : "text-zinc-300 hover:text-white hover:bg-white/5"
@@ -227,7 +220,6 @@ export default function Navbar() {
                   <ChevronDown size={14} className={`transition-transform ${activeDropdown === category.name ? "rotate-180" : ""}`} />
                 </motion.button>
 
-                {/* Dropdown Content */}
                 <AnimatePresence>
                   {activeDropdown === category.name && (
                     <motion.div
@@ -266,8 +258,10 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* RIGHT: CTA Button */}
-          <div className="hidden md:block">
+          {/* RIGHT: Language Switcher & CTA Button */}
+          <div className="hidden md:flex items-center gap-3">
+            <LanguageSwitcher />
+
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -308,40 +302,18 @@ export default function Navbar() {
       {/* ===== HAMBURGER BUTTON MOBILE ===== */}
       <button onClick={() => setOpen(!open)} className="md:hidden fixed left-0 top-1/2 -translate-y-1/2 z-50 group">
         <div className="relative">
-          {/* Background pill */}
           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-14 h-14 rounded-r-full bg-black/60 backdrop-blur-xl border border-white/10 border-l-0 -translate-x-1/2 group-hover:bg-black/80 transition-all" />
-
-          {/* Icon container */}
           <div
             className={`relative z-10 ml-0 w-10 h-10 rounded-full backdrop-blur-lg border flex items-center justify-center group-hover:border-white/20 transition-all ${
               currentPage !== "home" ? `${pageStyle.bgGradient.split(" ")[0]?.replace("/10", "/40")} ${pageStyle.borderColor}` : "bg-yellow/40 border-white/10"
             }`}
           >
-            <motion.div
-              initial={false}
-              animate={{
-                rotateX: open ? 90 : 0,
-                scale: open ? 0.8 : 1,
-              }}
-              transition={{ duration: 0.3 }}
-              className="absolute"
-            >
+            <motion.div initial={false} animate={{ rotateX: open ? 90 : 0, scale: open ? 0.8 : 1 }} transition={{ duration: 0.3 }} className="absolute">
               <Command size={20} className="text-white" />
             </motion.div>
-
-            <motion.div
-              initial={false}
-              animate={{
-                rotateX: open ? 0 : -90,
-                scale: open ? 1 : 0.8,
-              }}
-              transition={{ duration: 0.3 }}
-              className="absolute"
-            >
+            <motion.div initial={false} animate={{ rotateX: open ? 0 : -90, scale: open ? 1 : 0.8 }} transition={{ duration: 0.3 }} className="absolute">
               <Sparkles size={20} className={currentPage !== "home" ? pageStyle.iconColor : "text-[#1DB954]"} />
             </motion.div>
-
-            {/* Dot indicator */}
             {!open && <span className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full animate-pulse ring-2 ring-black ${pageStyle.indicatorColor}`} />}
           </div>
         </div>
@@ -352,7 +324,6 @@ export default function Navbar() {
         {open && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.6 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black z-40" onClick={() => setOpen(false)} />
-
             <motion.div
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
@@ -360,7 +331,7 @@ export default function Navbar() {
               transition={{ type: "spring", stiffness: 120, damping: 18 }}
               className="fixed bottom-6 left-4 right-4 z-50 rounded-3xl bg-zinc-900/95 backdrop-blur-xl border border-white/10 p-6 max-h-[70vh] overflow-y-auto"
             >
-              {/* Back Button untuk non-home pages */}
+              {/* Back Button */}
               {currentPage !== "home" && (
                 <motion.button
                   initial={{ opacity: 0, y: 10 }}
@@ -373,7 +344,12 @@ export default function Navbar() {
                 </motion.button>
               )}
 
-              {/* Mobile Menu Items dengan Kategori */}
+              {/* Language Switcher Mobile */}
+              <div className="mb-4">
+                <LanguageSwitcher />
+              </div>
+
+              {/* Mobile Menu Items */}
               <div className="space-y-1">
                 {menuCategories.map((category) => (
                   <div key={category.name} className="mb-4">
@@ -415,7 +391,7 @@ export default function Navbar() {
                   if (currentPage === "home") {
                     handleNavClick(SECTION_IDS.CRUD);
                   } else if (currentPage === "admin") {
-                    handleNavClick(SECTION_IDS.GUESTBOOK); // TAMBAH INI
+                    handleNavClick(SECTION_IDS.GUESTBOOK);
                   } else {
                     handleBackToHome();
                   }
@@ -424,8 +400,8 @@ export default function Navbar() {
                   currentPage === "home"
                     ? `bg-gradient-to-r ${pageStyle.ctaGradient} text-white`
                     : currentPage === "admin"
-                    ? "bg-gradient-to-r from-blue-500 to-cyan-600 text-white" // TAMBAH STYLE UNTUK ADMIN
-                    : "bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
+                      ? "bg-gradient-to-r from-blue-500 to-cyan-600 text-white"
+                      : "bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
                 }`}
               >
                 {currentPage === "home" ? (

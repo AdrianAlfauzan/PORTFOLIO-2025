@@ -27,7 +27,7 @@ export const sideProjects: SideProject[] = [
     status: "useful",
     githubUrl: "https://github.com/AdrianAlfauzan/zenith-guestbook",
     demoUrl: "https://ian-portfolio-25.netlify.app/guestbook",
-    features: ["Digital recording features", "QR scan support", "Data search validation", "Card printing"],
+    features: ["Show portfolio guestbook", "Comment management system", "Visitor log tracking", "Responsive design"],
     note: "Built to digitize traditional guestbook systems",
   },
   {

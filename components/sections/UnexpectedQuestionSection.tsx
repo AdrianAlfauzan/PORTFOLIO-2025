@@ -1,9 +1,10 @@
 "use client";
-
-import SectionWrapper from "../ui/SectionWrapper";
-import AnimatedTitle from "../ui/AnimatedTitle";
 import { motion } from "framer-motion";
-import { Quote, Server, Globe, Database, Terminal, Shield, Cloud } from "lucide-react";
+import { Quote, Server, Globe, Database, Terminal, Shield, Cloud, RefreshCw, Bug, Wifi, AlertCircle } from "lucide-react";
+
+// Components
+import SectionWrapper from "@/components/ui/SectionWrapper";
+import AnimatedTitle from "@/components/ui/AnimatedTitle";
 
 export default function UnexpectedQuestionSection() {
   return (
@@ -27,12 +28,12 @@ export default function UnexpectedQuestionSection() {
           {/* Icons row */}
           <div className="relative flex flex-wrap justify-center gap-4 md:gap-8 mb-8">
             {[
-              { icon: Server, label: "VPS", color: "text-blue-400" },
-              { icon: Globe, label: "Domain", color: "text-cyan-400" },
-              { icon: Database, label: "Database", color: "text-emerald-400" },
+              { icon: Database, label: "PostgreSQL", color: "text-blue-400" },
+              { icon: RefreshCw, label: "Cache", color: "text-cyan-400" },
+              { icon: Globe, label: "API", color: "text-emerald-400" },
               { icon: Terminal, label: "CLI", color: "text-amber-400" },
-              { icon: Shield, label: "Firewall", color: "text-red-400" },
-              { icon: Cloud, label: "DNS", color: "text-violet-400" },
+              { icon: Bug, label: "Debug", color: "text-red-400" },
+              { icon: Wifi, label: "Revalidate", color: "text-violet-400" },
             ].map((item, index) => (
               <motion.div
                 key={item.label}
@@ -53,16 +54,16 @@ export default function UnexpectedQuestionSection() {
           {/* Question quote */}
           <blockquote className="relative mb-8">
             <div className="absolute -left-4 top-0 text-6xl text-blue-500/20 font-serif">&ldquo;</div>
-            <p className="relative text-xl md:text-2xl font-medium text-zinc-100 leading-relaxed text-center pl-8 pr-8">&ldquo;Kok domain udah pointing ke VPS tapi website masih nggak bisa diakses?&ldquo;</p>
+            <p className="relative text-xl md:text-2xl font-medium text-zinc-100 leading-relaxed text-center pl-8 pr-8">&ldquo;Kok data gempa di website masih yang lama, padahal database udah di-update?&rdquo;</p>
             <div className="absolute -right-4 bottom-0 text-6xl text-purple-500/20 font-serif rotate-180">&ldquo;</div>
 
             <div className="mt-4 text-center">
-              <span className="inline-block px-4 py-1.5 bg-white/5 rounded-full text-sm text-zinc-400 border border-white/5">— Pertanyaan yang memicu 5 jam debugging DNS, firewall, dan server config</span>
+              <span className="inline-block px-4 py-1.5 bg-gradient-to-r from-amber-500/10 to-emerald-500/10 rounded-full text-sm text-zinc-300 border border-white/10">Pengalaman langsung dari project BMKG Stasiun Geofisika Kepahiang</span>
             </div>
           </blockquote>
 
           {/* Debugging details */}
-          <div className="grid md:grid-cols-2 gap-6 mt-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
             {/* Root cause */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -73,25 +74,26 @@ export default function UnexpectedQuestionSection() {
             >
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-lg bg-red-500/10">
-                  <Terminal size={18} className="text-red-400" />
+                  <AlertCircle size={18} className="text-red-400" />
                 </div>
                 <h3 className="font-semibold text-red-300">Root Cause</h3>
               </div>
               <ul className="space-y-2 text-sm text-zinc-300">
                 <li className="flex items-start gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 flex-shrink-0" />
-                  DNS propagation delay (TTL 24 jam)
+                  Cache Redis belum di-flush setelah update database
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 flex-shrink-0" />
-                  Port 80/443 tertutup di UFW firewall
+                  API response format berubah tapi frontend belum adaptif
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 flex-shrink-0" />
-                  Nginx server block belum dikonfigurasi
+                  Revalidate path di Next.js masih 60 detik (default)
                 </li>
                 <li className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 flex-shrink-0" />A record belum terupdate di nameserver
+                  <div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 flex-shrink-0" />
+                  Data earthquake dari USGS/BMKG kadang delay 5-10 menit
                 </li>
               </ul>
             </motion.div>
@@ -113,19 +115,19 @@ export default function UnexpectedQuestionSection() {
               <ul className="space-y-2 text-sm text-zinc-300">
                 <li className="flex items-start gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 flex-shrink-0" />
-                  Lower TTL & flush DNS cache
+                  Implement cache invalidation strategy (Redis FLUSHDB)
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 flex-shrink-0" />
-                  Configure UFW: sudo ufw allow 80,443/tcp
+                  Add API versioning (/v1, /v2) for backward compatibility
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 flex-shrink-0" />
-                  Setup Nginx server blocks & SSL (Certbot)
+                  Setup Next.js ISR with revalidate: 10 seconds
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 flex-shrink-0" />
-                  Verify with dig/nslookup & server monitoring
+                  Add background job to sync data every 5 minutes
                 </li>
               </ul>
             </motion.div>
@@ -138,7 +140,7 @@ export default function UnexpectedQuestionSection() {
               <h3 className="font-semibold text-zinc-200">Key Learnings</h3>
             </div>
             <div className="flex flex-wrap justify-center gap-3">
-              {["DNS Propagation Patterns", "Linux Firewall Management", "Nginx Reverse Proxy", "SSL Certificate Automation", "Server Monitoring Tools", "CLI Debugging Techniques"].map((item, index) => (
+              {["Cache Management (Redis/Memcached)", "API Versioning Strategy", "Next.js ISR & Revalidation", "BMKG Data Integration", "Background Job dengan BullMQ", "Error Boundary & Fallback UI"].map((item, index) => (
                 <motion.span
                   key={index}
                   initial={{ opacity: 0, y: 10 }}
