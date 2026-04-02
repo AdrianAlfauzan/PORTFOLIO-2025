@@ -1,10 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import SectionWrapper from "../ui/SectionWrapper";
-import AnimatedTitle from "../ui/AnimatedTitle";
-import { achievements } from "@/data/achievements";
 import { Trophy, Award, Star, Target, Medal, Flame } from "lucide-react";
+
+// Components
+import SectionWrapper from "@/components/ui/SectionWrapper";
+import AnimatedTitle from "@/components/ui/AnimatedTitle";
+
+// Data
+import { achievements } from "@/data/achievements";
 
 export default function AchievementSection() {
   // Pilih icon secara bergantian

@@ -23,7 +23,7 @@ export default function HeroSection() {
         const change = Math.random() > 0.5 ? 1 : -1;
         const newValue = prev + change;
         // Batasi antara 48-52
-        return Math.max(48, Math.min(52, newValue));
+        return Math.max(10, Math.min(20, newValue));
       });
     }, 2000); // Ubah setiap 2 detik
 

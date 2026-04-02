@@ -10,7 +10,7 @@ export const topTopics = [
   },
   {
     title: "Firestore & Storage",
-    description: "Keranjang → Ajukan → Pemesanan di BKMG",
+    description: "Data modeling, security rules, real-time updates",
   },
   {
     title: "WebSocket & Chat",

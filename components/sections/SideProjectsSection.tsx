@@ -55,8 +55,7 @@ export default function SideProjectsSection() {
         {/* Header dengan title playful */}
         <div className="text-center mb-12">
           <AnimatedTitle title="Experimental Playground" icon={TestTube} subtitle="Where ideas meet code, just for fun" />
-
-          <p className="text-zinc-400 mt-4 max-w-2xl mx-auto text-sm">A collection of random experiments, weekend projects, and &quot;what if&quot; coding sessions. None of these were client work—just pure curiosity and play!</p>
+          <p className="text-zinc-400 mt-4 max-w-2xl mx-auto text-sm">A collection of academic projects side explorations and technical experiments built to refine my skills in software engineering and cloud infrastructure</p>
         </div>
 
         {/* Category filters */}

@@ -1,27 +1,25 @@
 "use client";
 
 import { motion } from "framer-motion";
-import SectionWrapper from "../ui/SectionWrapper";
-import AnimatedTitle from "../ui/AnimatedTitle";
-import { monthlyRecap } from "@/data/monthlyRecap";
-import MonthCard from "../cards/MonthCard";
-import { Calendar, Rocket, TrendingUp, Code, Book, Zap, Users, Lightbulb, Target, Star, Award, Gem } from "lucide-react";
+import { Calendar, Rocket, Code, Book, Zap, Brain, UserCheck } from "lucide-react";
 
-// Helper untuk map bulan ke icon
+// Components
+import SectionWrapper from "@/components/ui/SectionWrapper";
+import AnimatedTitle from "@/components/ui/AnimatedTitle";
+import MonthCard from "@/components/cards/MonthCard";
+
+// Data
+import { monthlyRecap } from "@/data/monthlyRecap";
+
+// Helper untuk map bulan ke icon yang relevan dengan tema baru
 const getMonthIcon = (month: string) => {
   const iconMap: Record<string, typeof Calendar> = {
-    January: Rocket,
-    February: TrendingUp,
-    March: Code,
-    April: Book,
-    May: Zap,
-    June: Users,
-    July: Lightbulb,
-    August: Target,
-    September: Star,
-    October: Award,
-    November: Gem,
-    December: Calendar,
+    January: UserCheck, // Sesuai tema QA
+    February: Brain, // Sesuai tema AI
+    March: Rocket, // Sesuai tema Production Launch
+    April: Code, // Sesuai tema Backend Systems
+    May: Zap, // Sesuai tema Realtime WebRTC
+    June: Book, // Sesuai tema Thesis/Research
   };
   return iconMap[month] || Calendar;
 };
@@ -47,13 +45,14 @@ export default function MonthlyRecapSection() {
             whileHover={{ y: -6, scale: 1.01 }}
             className="relative group"
           >
-            {/* Glow Accent */}
+            {/* Glow Accent menggunakan warna brand hijau Spotify-like */}
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#1DB954]/15 to-transparent opacity-0 group-hover:opacity-100 transition" />
 
             <MonthCard
               {...m}
               icon={getMonthIcon(m.month)}
-              highlight={i === 0 || i === 5} // Jan & Jun sebagai highlight
+              // Highlight diubah ke indeks 2 (Maret) karena rilis Produksi adalah milestone terbesar
+              highlight={i === 2}
             />
           </motion.div>
         ))}
