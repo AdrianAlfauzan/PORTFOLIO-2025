@@ -9,31 +9,3 @@ export const SIDE_PROJECT_STATUS_COLORS: Record<SideProject["status"], string> =
   useful: "from-rose-500/20 to-red-500/20 border-rose-500/30 text-rose-300",
 };
 
-// export const SIDE_PROJECT_STATUS_LABELS: Record<SideProject["status"], string> = {
-//   experimental: "Experimental",
-//   fun: "Just For Fun",
-//   weird: "Weird & Wonderful",
-//   nostalgic: "Nostalgic",
-//   educational: "Educational",
-//   useful: "Useful Tool",
-// };
-
-// export const CATEGORY_ICONS: Record<string, string> = {
-//   "Design Tools": "🎨",
-//   "WebGL Experiments": "✨",
-//   "AI Playground": "🧠",
-//   Games: "🎮",
-//   "Learning Tools": "📚",
-//   "Browser Extensions": "🔧",
-//   "Web APIs": "🌐",
-//   "CSS Experiments": "💅",
-//   "Backend Tools": "⚙️",
-// };
-
-// export const SIDE_PROJECT_SORT_OPTIONS = [
-//   { value: "newest", label: "Newest First" },
-//   { value: "oldest", label: "Oldest First" },
-//   { value: "name-asc", label: "Name (A-Z)" },
-//   { value: "name-desc", label: "Name (Z-A)" },
-//   { value: "category", label: "By Category" },
-// ];

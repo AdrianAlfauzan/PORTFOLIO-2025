@@ -4,15 +4,18 @@ import { motion } from "framer-motion";
 import { ExternalLink, Github, ChevronLeft, ChevronRight, TestTube } from "lucide-react";
 import { useState } from "react";
 
-// OUR DATA & TYPES
-import { sideProjects } from "@/data/side-projects";
-import { DEFAULT_ITEMS_PER_PAGE, getUniqueCategories } from "@/data/side-projects";
-import { SIDE_PROJECT_STATUS_COLORS } from "@/constants/side-projects";
-import { SideProject } from "@/types/side-projects";
-
-// OUR COMPONENTS
+// Components
 import AnimatedTitle from "@/components/ui/AnimatedTitle";
 import SectionWrapper from "@/components/ui/SectionWrapper";
+// Constants 
+import { SIDE_PROJECT_STATUS_COLORS } from "@/constants/side-projects";
+
+// Data
+import { DEFAULT_ITEMS_PER_PAGE, getUniqueCategories } from "@/data/side-projects";
+import { sideProjects } from "@/data/side-projects";
+
+// Types
+import { SideProject } from "@/types/side-projects";
 
 // Items per page
 const ITEMS_PER_PAGE = DEFAULT_ITEMS_PER_PAGE;
