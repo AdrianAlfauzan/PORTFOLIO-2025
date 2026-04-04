@@ -55,12 +55,12 @@ export const metadata: Metadata = {
   // Icons
   icons: {
     icon: "/CodingNGamer.webp",
-    apple: "/apple-touch-icon.png", // Buat ini juga
+    apple: "/apple-touch-icon.png",
   },
 
-  // Opsional: verifikasi Google Search Console
+  // verifikasi Google Search Console
   verification: {
-    google: "googlee663e92c65ff7230", // Dapatkan dari Google Search Console
+    google: "googlee663e92c65ff7230",
   },
 
   // Alternatif bahasa
