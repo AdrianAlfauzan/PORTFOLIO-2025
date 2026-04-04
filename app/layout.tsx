@@ -60,7 +60,7 @@ export const metadata: Metadata = {
 
   // Opsional: verifikasi Google Search Console
   verification: {
-    google: "MASUKKAN_KODE_VERIFIKASI_ANDA", // Dapatkan dari Google Search Console
+    google: "googlee663e92c65ff7230", // Dapatkan dari Google Search Console
   },
 
   // Alternatif bahasa
