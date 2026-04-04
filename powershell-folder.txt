@@ -1,0 +1,1 @@
+Get-ChildItem -Path app, utils, types, assets, components, constants, context, hooks -Recurse | Select-Object FullName 
