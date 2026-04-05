@@ -75,7 +75,7 @@ export default function HeroSection() {
           setIsVisible(false);
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.5 },
     );
 
     if (currentSection) {
