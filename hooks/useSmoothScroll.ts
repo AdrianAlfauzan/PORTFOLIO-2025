@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 
 interface ScrollOptions {
   behavior?: "auto" | "smooth";
@@ -15,26 +15,55 @@ const defaultOptions: ScrollOptions = {
 };
 
 export function useSmoothScroll() {
+  // Fix type: HTMLElement | undefined (bukan null)
+  const elementCache = useRef<Map<string, HTMLElement>>(new Map());
+
   const scrollToElement = useCallback((elementId: string, options: ScrollOptions = {}) => {
-    const element = document.getElementById(elementId);
+    let element = elementCache.current.get(elementId);
+
+    if (!element) {
+      const foundElement = document.getElementById(elementId);
+      if (foundElement) {
+        element = foundElement;
+        elementCache.current.set(elementId, element);
+      }
+    }
+
     if (element) {
-      element.scrollIntoView({ ...defaultOptions, ...options });
+      requestAnimationFrame(() => {
+        element.scrollIntoView({ ...defaultOptions, ...options });
+      });
       return true;
     }
     return false;
   }, []);
 
   const scrollToTop = useCallback((options: ScrollOptions = {}) => {
-    window.scrollTo({ top: 0, behavior: options.behavior || "smooth" });
+    requestAnimationFrame(() => {
+      window.scrollTo({
+        top: 0,
+        behavior: options.behavior || "smooth",
+      });
+    });
   }, []);
 
   const scrollToPosition = useCallback((position: number, options: ScrollOptions = {}) => {
-    window.scrollTo({ top: position, behavior: options.behavior || "smooth" });
+    requestAnimationFrame(() => {
+      window.scrollTo({
+        top: position,
+        behavior: options.behavior || "smooth",
+      });
+    });
+  }, []);
+
+  const clearCache = useCallback(() => {
+    elementCache.current.clear();
   }, []);
 
   return {
     scrollToElement,
     scrollToTop,
     scrollToPosition,
+    clearCache,
   };
 }
