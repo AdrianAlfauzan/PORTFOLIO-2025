@@ -13,7 +13,7 @@ import WelcomeModal from "@/components/WelcomeModal";
 import AnnouncementAlert from "@/components/AnnouncementAlert";
 import BackgroundScene from "@/components/3d/BackgroundScene";
 import SideProjectsSection from "@/components/sections/SideProjectsSection";
-
+import TestAppSection from "@/components/sections/TestAppSection";
 export default function Home() {
   return (
     <main className="relative overflow-x-hidden">
@@ -28,7 +28,9 @@ export default function Home() {
         <section id="home">
           <HeroSection />
         </section>
-
+        <section id="testapp-ptsp">
+          <TestAppSection />
+        </section>
         <section id="top-topics">
           <TopTopicsSection />
         </section>
