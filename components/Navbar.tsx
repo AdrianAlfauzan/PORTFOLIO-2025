@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Sparkles, Command, ArrowLeft, ChevronDown, Home, Star, Target, FolderKanban, Calendar, HelpCircle, PenTool, Trophy, Database, User, MessageSquare, Users, Lock, TestTube, Globe } from "lucide-react";
+import { Sparkles, Command, ArrowLeft, ChevronDown, Home, Star, Target, FolderKanban, Calendar, HelpCircle, PenTool, Trophy, Database, User, MessageSquare, Users, Lock, TestTube, FileCheck } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 
 // OUR LIBRARIES
@@ -27,6 +27,7 @@ const menuCategories = [
       { label: "Projects", id: SECTION_IDS.PROJECTS, icon: FolderKanban },
       { label: "Side Projects", id: SECTION_IDS.SIDE_PROJECTS, icon: TestTube },
       { label: "CRUD Demo", id: SECTION_IDS.CRUD, icon: Database },
+      { label: "PTSP Revamp", id: SECTION_IDS.TESTAPP_PTSP, icon: FileCheck }, // ✅ Added
     ],
   },
   {
@@ -73,6 +74,7 @@ export default function Navbar() {
     setOpen(false);
     setActiveDropdown(null);
 
+    // Handle special pages
     if (sectionId === SECTION_IDS.CRUD || sectionId === SECTION_IDS.GUESTBOOK || sectionId === SECTION_IDS.ADMIN_GUESTBOOK) {
       const targetPage = sectionId === SECTION_IDS.CRUD ? PAGES.CRUD : sectionId === SECTION_IDS.GUESTBOOK ? PAGES.GUESTBOOK : PAGES.ADMIN_GUESTBOOK;
 
@@ -84,6 +86,20 @@ export default function Navbar() {
       return;
     }
 
+    // Handle PTSP Revamp (scroll ke section di home)
+    if (sectionId === SECTION_IDS.TESTAPP_PTSP) {
+      if (currentPage !== "home") {
+        router.push(`${PAGES.HOME}#${sectionId}`);
+        return;
+      }
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+      return;
+    }
+
+    // Handle other sections
     if (currentPage !== "home") {
       router.push(`${PAGES.HOME}#${sectionId}`);
       return;
@@ -209,7 +225,11 @@ export default function Navbar() {
                   className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all ${
                     activeDropdown === category.name ||
                     category.items.some(
-                      (item) => (item.id === SECTION_IDS.CRUD && currentPage === "crud") || (item.id === SECTION_IDS.GUESTBOOK && currentPage === "guestbook") || (item.id === SECTION_IDS.ADMIN_GUESTBOOK && currentPage === "admin"),
+                      (item) =>
+                        (item.id === SECTION_IDS.CRUD && currentPage === "crud") ||
+                        (item.id === SECTION_IDS.GUESTBOOK && currentPage === "guestbook") ||
+                        (item.id === SECTION_IDS.ADMIN_GUESTBOOK && currentPage === "admin") ||
+                        (item.id === SECTION_IDS.TESTAPP_PTSP && pathname === PAGES.HOME),
                     )
                       ? "bg-white/10 text-white"
                       : "text-zinc-300 hover:text-white hover:bg-white/5"
@@ -233,7 +253,10 @@ export default function Navbar() {
                         {category.items.map((item) => {
                           const ItemIcon = item.icon;
                           const isActive =
-                            (item.id === SECTION_IDS.CRUD && currentPage === "crud") || (item.id === SECTION_IDS.GUESTBOOK && currentPage === "guestbook") || (item.id === SECTION_IDS.ADMIN_GUESTBOOK && currentPage === "admin");
+                            (item.id === SECTION_IDS.CRUD && currentPage === "crud") ||
+                            (item.id === SECTION_IDS.GUESTBOOK && currentPage === "guestbook") ||
+                            (item.id === SECTION_IDS.ADMIN_GUESTBOOK && currentPage === "admin") ||
+                            (item.id === SECTION_IDS.TESTAPP_PTSP && pathname === PAGES.HOME);
 
                           return (
                             <motion.button
@@ -360,7 +383,11 @@ export default function Navbar() {
                     <div className="space-y-1">
                       {category.items.map((item, i) => {
                         const ItemIcon = item.icon;
-                        const isActive = (item.id === SECTION_IDS.CRUD && currentPage === "crud") || (item.id === SECTION_IDS.GUESTBOOK && currentPage === "guestbook") || (item.id === SECTION_IDS.ADMIN_GUESTBOOK && currentPage === "admin");
+                        const isActive =
+                          (item.id === SECTION_IDS.CRUD && currentPage === "crud") ||
+                          (item.id === SECTION_IDS.GUESTBOOK && currentPage === "guestbook") ||
+                          (item.id === SECTION_IDS.ADMIN_GUESTBOOK && currentPage === "admin") ||
+                          (item.id === SECTION_IDS.TESTAPP_PTSP && pathname === PAGES.HOME);
 
                         return (
                           <motion.button

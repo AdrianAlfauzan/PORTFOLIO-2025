@@ -62,10 +62,13 @@ export default function TestAppSection() {
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
           <span className="text-sm font-mono text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full inline-flex items-center gap-1">
             <Award className="w-3 h-3" />
-            Featured Project
+            Official Mobile Application
           </span>
-          <h2 className="text-4xl md:text-5xl font-bold mt-4 mb-4 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">TESTAPP PTSP REVAMP</h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">Aplikasi perizinan modern untuk Pelayanan Terpadu Satu Pintu (PTSP) dengan fitur lengkap dan antarmuka yang user-friendly.</p>
+          <h2 className="text-4xl md:text-5xl font-bold mt-4 mb-4 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+            PTSP BMKG <br className="hidden sm:block" />
+            <span className="text-3xl md:text-4xl">Provinsi Bengkulu Mobile</span>
+          </h2>
+          <p className="text-gray-400 max-w-2xl mx-auto">Aplikasi perizinan resmi berbasis Android dari BMKG Provinsi Bengkulu. Akses mudah, cepat, dan aman langsung dari smartphone Anda.</p>
         </motion.div>
 
         {/* Tab Navigation */}
@@ -99,15 +102,16 @@ export default function TestAppSection() {
                     Tentang Aplikasi
                   </h3>
                   <p className="text-gray-300 leading-relaxed mb-4">
-                    <strong className="text-blue-400">TESTAPP PTSP REVAMP</strong> adalah sistem informasi perizinan berbasis web yang dirancang untuk mempermudah masyarakat dalam mengurus berbagai dokumen perizinan.
+                    <strong className="text-blue-400">PTSP BMKG Mobile</strong> adalah aplikasi perizinan resmi berbasis Android dari <strong className="text-blue-400">BMKG Provinsi Bengkulu</strong> yang dirancang untuk mempermudah
+                    masyarakat dalam mengurus berbagai dokumen perizinan secara mobile.
                   </p>
                   <p className="text-gray-300 leading-relaxed mb-4">
-                    Aplikasi ini merupakan hasil revamp dari sistem lama dengan pendekatan modern menggunakan teknologi terkini untuk memberikan pengalaman yang lebih cepat, aman, dan transparan.
+                    Aplikasi mobile ini merupakan hasil revamp dari sistem lama dengan pendekatan modern menggunakan teknologi terkini untuk memberikan pengalaman yang lebih cepat, aman, dan transparan langsung dari smartphone Anda.
                   </p>
                   <div className="flex flex-wrap gap-2 mt-4">
                     <span className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm flex items-center gap-1">
                       <Boxes className="w-3 h-3" />
-                      Next.js
+                      React Native
                     </span>
                     <span className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm flex items-center gap-1">
                       <Key className="w-3 h-3" />
@@ -126,27 +130,37 @@ export default function TestAppSection() {
                 <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
                   <h4 className="text-lg font-semibold mb-3 text-white flex items-center gap-2">
                     <Target className="w-5 h-5 text-green-400" />
-                    Tujuan Revamp
+                    Tujuan Revamp Mobile
                   </h4>
                   <ul className="space-y-3 text-gray-300">
                     <li className="flex items-start gap-2">
                       <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-                      Meningkatkan kecepatan akses dan response time
+                      Akses perizinan kapan saja dan di mana saja via smartphone
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-                      Antarmuka yang lebih intuitif dan modern
+                      Antarmuka yang responsif dan mudah digunakan di layar sentuh
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-                      Sistem notifikasi real-time untuk update status
+                      Notifikasi push real-time untuk update status pengajuan
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-                      Keamanan data yang lebih baik dengan enkripsi
+                      Keamanan data tingkat lanjut dengan enkripsi end-to-end
                     </li>
                   </ul>
                 </div>
+              </div>
+
+              {/* Developer Info */}
+              <div className="mt-6 p-4 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-xl border border-blue-500/20 text-center">
+                <p className="text-sm text-gray-300">
+                  <strong className="text-blue-400">PTSP BMKG Provinsi Bengkulu</strong> – Aplikasi perizinan resmi versi mobile
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Dikembangkan oleh <strong className="text-white">Adrian Musa Alfauzan</strong> • Mahasiswa S1 IT Data & Software Engineering • Universitas Jenderal Achmad Yani
+                </p>
               </div>
             </div>
           )}
@@ -169,7 +183,15 @@ export default function TestAppSection() {
             </div>
           )}
 
-          {activeTab === "demo" && <LiveDemo embedUrl={testAppEmbedUrl} title="TESTAPP PTSP REVAMP Demo" description="Berikut adalah tampilan langsung dari aplikasi TESTAPP PTSP REVAMP." showNotice={true} minHeight="500px" />}
+          {activeTab === "demo" && (
+            <LiveDemo
+              embedUrl={testAppEmbedUrl}
+              title="PTSP BMKG Mobile - Aplikasi Perizinan Resmi"
+              description="Berikut adalah tampilan langsung dari aplikasi mobile PTSP BMKG Provinsi Bengkulu. Aplikasi ini merupakan versi mobile dari sistem perizinan terpadu yang dapat diakses melalui smartphone."
+              showNotice={true}
+              minHeight="600px"
+            />
+          )}
         </motion.div>
 
         {/* Stats Section */}

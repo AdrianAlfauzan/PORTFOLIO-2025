@@ -12,6 +12,7 @@ export const SECTION_IDS = {
   OBSESSION: "obsession",
   PROJECTS: "projects",
   SIDE_PROJECTS: "side-projects",
+  TESTAPP_PTSP: "testapp-ptsp",
   MONTHLY: "monthly",
   UNEXPECTED_QUESTION: "unexpected-question",
   SIGNATURE_STYLE: "signature-style",
