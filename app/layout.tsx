@@ -17,8 +17,8 @@ const plusJakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: {
     // Template untuk halaman lain: "Judul Halaman | Adrian Fauzan"
-    default: "Adrian Fauzan | Portofolio Data & Software Engineer",
-    template: "%s | Adrian Fauzan",
+    default: "Adrian Musa Alfauzan | Portofolio Data & Software Engineer",
+    template: "%s | Adrian Musa Alfauzan",
   },
   description: "Portofolio Adrian Musa Al Fauzan - Mahasiswa IT spesialis Data Engineer dan Software Engineer. Lihat proyek Python, SQL, Next.js, dan analisis data.",
   keywords: ["Data Engineer", "Software Engineer", "Portofolio", "Next.js", "Python", "SQL", "Adrian Fauzan", "Mahasiswa IT"],
