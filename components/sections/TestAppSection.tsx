@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { FileText, MapPin, Paperclip, History, Info, BookOpen, Target, Award, LayoutDashboard, Eye, Zap, Key, Shield, CheckCircle, Boxes, Sparkles, X, AlertTriangle } from "lucide-react";
+import { useState, useRef } from "react";
+import { motion } from "framer-motion";
+import { FileText, MapPin, Paperclip, History, Info, BookOpen, Target, Award, LayoutDashboard, Eye, Zap, Key, Shield, CheckCircle, Boxes, Sparkles, AlertTriangle } from "lucide-react";
 
-// Components
 import SectionWrapper from "@/components/ui/SectionWrapper";
 import LiveDemo from "@/components/ui/LiveDemo";
+import ReminderPopup from "@/components/WarningPopupApk";
 
-// Constants
 import { testAppStats, testAppTechStats } from "@/constants/testapp-data";
 
 interface TestAppFeature {
@@ -20,6 +19,7 @@ interface TestAppFeature {
 export default function TestAppSection() {
   const [activeTab, setActiveTab] = useState<"overview" | "features" | "demo">("overview");
   const [showReminderPopup, setShowReminderPopup] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const handleOpenPopup = () => {
     setShowReminderPopup(true);
@@ -80,7 +80,7 @@ export default function TestAppSection() {
           <p className="text-gray-400 max-w-2xl mx-auto">Aplikasi perizinan resmi berbasis Android dari BMKG Provinsi Bengkulu. Akses mudah, cepat, dan aman langsung dari smartphone Anda.</p>
         </motion.div>
 
-        {/* Tab Navigation - Responsive */}
+        {/* Tab Navigation */}
         <div className="flex justify-center mb-8">
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-full p-1 flex gap-1 flex-wrap justify-center">
             {[
@@ -165,7 +165,7 @@ export default function TestAppSection() {
                 </div>
               </div>
 
-              {/* Developer Info - Responsive */}
+              {/* Developer Info */}
               <div className="mt-6 p-3 md:p-4 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-xl border border-blue-500/20 text-center">
                 <p className="text-xs md:text-sm text-gray-300">
                   <strong className="text-blue-400">PTSP BMKG Provinsi Bengkulu</strong> – Aplikasi perizinan resmi versi mobile
@@ -197,8 +197,9 @@ export default function TestAppSection() {
 
           {activeTab === "demo" && (
             <div className="relative">
-              {/* Tombol Popup - Responsive untuk mobile */}
+              {/* Tombol Popup */}
               <motion.button
+                ref={buttonRef}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 whileHover={{ scale: 1.05 }}
@@ -226,7 +227,7 @@ export default function TestAppSection() {
           )}
         </motion.div>
 
-        {/* Stats Section - Responsive */}
+        {/* Stats Section */}
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mt-8 md:mt-12 text-center">
           {testAppStats.map((stat, i) => (
             <div key={i} className="bg-gray-800/30 rounded-xl p-3 md:p-4 border border-gray-700 hover:border-blue-500/50 transition-all group">
@@ -246,67 +247,15 @@ export default function TestAppSection() {
         </motion.div>
       </div>
 
-      {/* REMINDER POPUP - Fully Responsive */}
-      <AnimatePresence>
-        {showReminderPopup && (
-          <>
-            {/* Backdrop */}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={handleClosePopup} className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50" />
-
-            {/* Popup Content - Responsive untuk semua device */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8, y: 50 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8, y: 50 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="fixed inset-x-4 top-1/2 -translate-y-1/2 z-50 mx-auto max-w-md md:max-w-lg lg:max-w-md"
-            >
-              <div className="bg-gradient-to-br from-gray-900 to-gray-950 rounded-2xl border border-yellow-500/30 shadow-2xl shadow-yellow-500/20 overflow-hidden">
-                {/* Header */}
-                <div className="bg-gradient-to-r from-yellow-600/20 to-orange-600/20 px-4 md:px-6 py-3 md:py-4 border-b border-yellow-500/20 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 md:w-5 md:h-5 text-yellow-400" />
-                    <h3 className="font-semibold text-white text-sm md:text-base">Informasi Aplikasi</h3>
-                  </div>
-                  <button onClick={handleClosePopup} className="p-1 rounded-full hover:bg-white/10 transition-colors">
-                    <X className="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
-                  </button>
-                </div>
-
-                {/* Body */}
-                <div className="p-4 md:p-6">
-                  <div className="flex items-start gap-3 mb-4">
-                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
-                      <span className="text-yellow-400 text-base md:text-xl">📱</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-gray-300 text-xs md:text-sm leading-relaxed">
-                        <strong className="text-yellow-400">Kenapa PTSP ini dalam bentuk .APK?</strong>
-                        <br />
-                        Karena dari pihak <strong className="text-blue-400">BMKG Provinsi Bengkulu</strong> saat ini
-                        <span className="text-yellow-300"> masih belum bisa melakukan perizinan ke pusat BMKG secara langsung</span>.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="bg-yellow-500/10 rounded-xl p-3 md:p-4 border border-yellow-500/20 mt-4">
-                    <p className="text-[10px] md:text-xs text-gray-400 leading-relaxed">
-                      💡 Aplikasi ini masih dalam tahap pengembangan dan uji coba internal. Untuk sementara, aplikasi didistribusikan dalam bentuk file .APK sebelum mendapatkan izin resmi untuk publikasi di Google Play Store.
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={handleClosePopup}
-                    className="w-full mt-4 md:mt-6 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl text-white font-medium text-sm md:text-base hover:shadow-lg hover:shadow-yellow-500/25 transition-all"
-                  >
-                    Mengerti, lanjutkan
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      {/* Reminder Popup */}
+      <ReminderPopup
+        isOpen={showReminderPopup}
+        onClose={handleClosePopup}
+        anchorRef={buttonRef}
+        title="Informasi Aplikasi"
+        message="Kenapa PTSP ini dalam bentuk .APK?"
+        detail="Karena dari pihak BMKG Provinsi Bengkulu saat ini masih belum bisa melakukan perizinan ke pusat BMKG secara langsung."
+      />
     </SectionWrapper>
   );
 }
