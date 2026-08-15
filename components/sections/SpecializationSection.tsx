@@ -1,48 +1,49 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Zap, ShieldCheck, Heart, Coffee, Code2, Search, Pencil } from "lucide-react";
+import { Globe, Bug, Database, Code2, ShieldCheck, Rocket, Pencil } from "lucide-react";
+
 // Components
 import SectionWrapper from "@/components/ui/SectionWrapper";
 import AnimatedTitle from "@/components/ui/AnimatedTitle";
 
 const styles = [
   {
-    icon: Zap,
-    text: "AI Assisted & Fast Delivery",
-    description: "Leveraging advanced AI tools to accelerate development speed by 30 to 50 percent while maintaining code quality",
+    icon: Globe,
+    text: "Fullstack Developer (Web & Mobile)",
+    description: "Membangun website dan aplikasi mobile dengan Next.js, React Native, dan NestJS. Terbukti di 3 proyek BMKG dan PTSP Bengkulu.",
+  },
+  {
+    icon: Bug,
+    text: "Quality Assurance & Manual Testing",
+    description: "2+ tahun pengalaman QA freelance di Atmos Education & PT Tekno Indo Kreatis. Functional, Integration, E2E, Regression, dan UAT testing.",
+  },
+  {
+    icon: Database,
+    text: "Database & API Integration",
+    description: "Mengelola PostgreSQL, MySQL, MongoDB, Firebase. Integrasi REST API dengan Postman, Swagger, dan SQL query untuk validasi data.",
   },
   {
     icon: ShieldCheck,
-    text: "QA Mindset & Clean Code",
-    description: "Deep experience in manual testing and UAT ensuring every feature is stable secure and bug free before deployment",
-  },
-  {
-    icon: Heart,
-    text: "Creative & User Centric",
-    description: "Focusing on interactive experiences and emotional connection through polished UI and smooth animations",
-  },
-  {
-    icon: Coffee,
-    text: "Introverted but Highly Productive",
-    description: "A deep worker who thrives in focused environments to deliver high quality results and meet tight deadlines",
+    text: "Government & Mission-Critical Systems",
+    description: "Berpengalaman di 3 BMKG (Meteorologi, Klimatologi, Geofisika) dan BASARNAS - sistem yang butuh akurasi & real-time.",
   },
   {
     icon: Code2,
-    text: "Fullstack Versatility",
-    description: "Fluent in bridging the gap between mobile interfaces web platforms and scalable backend architectures",
+    text: "Fullstack & Backend Architecture",
+    description: "Membangun RESTful API, CMS, role-based dashboard, real-time chat (WebRTC/WebSockets), dan cache management (Redis).",
   },
   {
-    icon: Search,
-    text: "Detail Oriented Researcher",
-    description: "Analyzing complex systems from weather radars to seismic databases with high precision and technical accuracy",
+    icon: Rocket,
+    text: "DevOps & CI/CD",
+    description: "Deployment di VPS Hostinger, DNS management, CI/CD dengan GitHub Actions, dan monitoring aplikasi production.",
   },
 ];
 
 export default function SignatureStyleSection() {
   return (
     <SectionWrapper>
-      <AnimatedTitle title="Signature Style" icon={Pencil} />
+      <AnimatedTitle title="Specialization" icon={Pencil} />
 
       <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl">
         {styles.map((item, i) => (

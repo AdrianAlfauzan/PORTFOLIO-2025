@@ -6,7 +6,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 export default function HeroSection() {
   // State untuk counter dengan variasi
   const [projects, setProjects] = useState(50);
-  const [techStack, setTechStack] = useState(21);
+  const [techStack, setTechStack] = useState(26);
   const [bugsFixed, setBugsFixed] = useState(1000);
   const [coffeeCount, setCoffeeCount] = useState(500);
   const [isVisible, setIsVisible] = useState(false);
@@ -32,7 +32,7 @@ export default function HeroSection() {
       setTechStack((prev) => {
         const change = Math.random() > 0.5 ? 1 : -1;
         const newValue = prev + change;
-        return Math.max(20, Math.min(22, newValue));
+        return Math.max(20, Math.min(25, newValue));
       });
     }, 2500);
 
@@ -184,7 +184,7 @@ export default function HeroSection() {
           {/* Main description */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="max-w-2xl mx-auto mb-10 relative z-10">
             <p className="text-xl md:text-2xl text-zinc-200 text-center leading-relaxed drop-shadow">
-              From <span className="font-semibold text-emerald-300 drop-shadow">pentester scripts</span> to <span className="font-semibold text-blue-300 drop-shadow">full-stack apps</span>. 3 years of building, debugging, and turning coffee
+              From <span className="font-semibold text-emerald-300 drop-shadow">pentester scripts</span> to <span className="font-semibold text-blue-300 drop-shadow">full-stack apps</span>. 2 years of building, debugging, and turning coffee
               into <span className="italic text-purple-300 drop-shadow">clean code</span>.
             </p>
           </motion.div>

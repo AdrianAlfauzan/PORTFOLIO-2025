@@ -14,8 +14,8 @@ export const SECTION_IDS = {
   SIDE_PROJECTS: "side-projects",
   TESTAPP_PTSP: "testapp-ptsp",
   MONTHLY: "monthly",
-  UNEXPECTED_QUESTION: "unexpected-question",
-  SIGNATURE_STYLE: "signature-style",
+  // UNEXPECTED_QUESTION: "unexpected-question",
+  SPECIALIZATION: "specialization",
   ACHIEVEMENTS: "achievements",
 
   // Special pages

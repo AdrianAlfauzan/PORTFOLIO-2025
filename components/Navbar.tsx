@@ -27,7 +27,7 @@ const menuCategories = [
       { label: "Projects", id: SECTION_IDS.PROJECTS, icon: FolderKanban },
       { label: "Side Projects", id: SECTION_IDS.SIDE_PROJECTS, icon: TestTube },
       { label: "CRUD Demo", id: SECTION_IDS.CRUD, icon: Database },
-      { label: "PTSP Revamp", id: SECTION_IDS.TESTAPP_PTSP, icon: FileCheck }, // ✅ Added
+      { label: "PTSP Revamp", id: SECTION_IDS.TESTAPP_PTSP, icon: FileCheck },
     ],
   },
   {
@@ -35,8 +35,8 @@ const menuCategories = [
     icon: PenTool,
     items: [
       { label: "Monthly", id: SECTION_IDS.MONTHLY, icon: Calendar },
-      { label: "Most Unexpected", id: SECTION_IDS.UNEXPECTED_QUESTION, icon: HelpCircle },
-      { label: "Signature", id: SECTION_IDS.SIGNATURE_STYLE, icon: PenTool },
+      // { label: "Most Unexpected", id: SECTION_IDS.UNEXPECTED_QUESTION, icon: HelpCircle },
+      { label: "Specialization ", id: SECTION_IDS.SPECIALIZATION, icon: PenTool },
       { label: "Achievements", id: SECTION_IDS.ACHIEVEMENTS, icon: Trophy },
     ],
   },

@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { Quote, Server, Globe, Database, Terminal, Shield, Cloud, RefreshCw, Bug, Wifi, AlertCircle } from "lucide-react";
+import { Quote, Globe, Database, Terminal, Shield, RefreshCw, Bug, Wifi, AlertCircle } from "lucide-react";
 
 // Components
 import SectionWrapper from "@/components/ui/SectionWrapper";

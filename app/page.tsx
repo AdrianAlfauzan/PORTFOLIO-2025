@@ -5,8 +5,8 @@ import HeroSection from "@/components/sections/HeroSection";
 import TopTopicsSection from "@/components/sections/TopTopicsSection";
 import ObsessionSection from "@/components/sections/ObsessionSection";
 import ProjectsSection from "@/components/sections/ProjectsSection";
-import UnexpectedQuestionSection from "@/components/sections/UnexpectedQuestionSection";
-import SignatureStyleSection from "@/components/sections/SignatureStyleSection";
+// import UnexpectedQuestionSection from "@/components/sections/UnexpectedQuestionSection";
+import SpecializationSection from "@/components/sections/SpecializationSection";
 import MonthlyRecapSection from "@/components/sections/MonthlyRecapSection";
 import AchievementSection from "@/components/sections/AchievementSection";
 import WelcomeModal from "@/components/WelcomeModal";
@@ -51,12 +51,10 @@ export default function Home() {
           <MonthlyRecapSection />
         </section>
 
-        <section id="unexpected-question">
-          <UnexpectedQuestionSection />
-        </section>
+        <section id="unexpected-question">{/* <UnexpectedQuestionSection /> */}</section>
 
-        <section id="signature-style">
-          <SignatureStyleSection />
+        <section id="specialization">
+          <SpecializationSection />
         </section>
 
         <section id="achievements">

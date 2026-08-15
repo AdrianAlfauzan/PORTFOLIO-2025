@@ -16,28 +16,28 @@ const plusJakarta = Plus_Jakarta_Sans({
 // ========== OPTIMASI SEO DI SINI ==========
 export const metadata: Metadata = {
   title: {
-    // Template untuk halaman lain: "Judul Halaman | Adrian Fauzan"
+    // Template untuk halaman lain: "Judul Halaman | Adrian Musa Alfauzan"
     default: "Adrian Musa Alfauzan | Portofolio Data & Software Engineer",
     template: "%s | Adrian Musa Alfauzan",
   },
   description: "Portofolio Adrian Musa Al Fauzan - Mahasiswa IT spesialis Data Engineer dan Software Engineer. Lihat proyek Python, SQL, Next.js, dan analisis data.",
-  keywords: ["Data Engineer", "Software Engineer", "Portofolio", "Next.js", "Python", "SQL", "Adrian Fauzan", "Mahasiswa IT"],
+  keywords: ["Data Engineer", "Software Engineer", "Portofolio", "Next.js", "Python", "SQL", "Adrian Musa Alfauzan", "Mahasiswa IT"],
   authors: [{ name: "Adrian Musa Al Fauzan" }],
   creator: "Adrian Musa Al Fauzan",
   publisher: "Adrian Musa Al Fauzan",
 
   // Open Graph (untuk tampilan bagus di LinkedIn, WhatsApp, Twitter)
   openGraph: {
-    title: "Adrian Fauzan | Data & Software Engineer",
+    title: "Adrian Musa Alfauzan | Data & Software Engineer",
     description: "Portofolio proyek Data Engineer dan Software Engineer. Klik untuk lihat karya Adrian!",
     url: "https://adrianalfauzan-dev.netlify.app",
-    siteName: "Adrian Fauzan Portfolio",
+    siteName: "Adrian Musa Alfauzan Portfolio",
     images: [
       {
         url: "/og-image.png", // Buat gambar ini nanti
         width: 1200,
         height: 630,
-        alt: "Adrian Fauzan Portfolio",
+        alt: "Adrian Musa Alfauzan Portfolio",
       },
     ],
     locale: "id_ID",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   // Twitter Card (tetap muncul meskipun Anda tidak punya Twitter aktif)
   twitter: {
     card: "summary_large_image",
-    title: "Adrian Fauzan | Data & Software Engineer",
+    title: "Adrian Musa Alfauzan | Data & Software Engineer",
     description: "Portofolio proyek Data Engineer dan Software Engineer. Kunjungi LinkedIn saya di linkedin.com/in/adrian-alfauzan",
     images: ["/CodingNGamer.webp"],
   },

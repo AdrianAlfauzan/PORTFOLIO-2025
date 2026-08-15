@@ -72,4 +72,15 @@ export const achievements: Achievement[] = [
     imagePath: "/assets/Images/SertiMinilemon.png",
     certificateNumber: "-",
   },
+  {
+    id: "atmos",
+    title: "Quality Assurance - ATMOS Project Website",
+    organization: "Atmos Education",
+    date: "Oktober 2025 - Januari 2026",
+    role: "Quality Assurance (Freelance)",
+    description:
+      "Melakukan pengujian fungsional, integrasi, end-to-end, regresi, dan UAT. Menguji API dengan Postman & Swagger, memvalidasi database dengan SQL, serta melakukan analisis akar masalah dan pelacakan defect menggunakan tools Microsoft.",
+    imagePath: "/assets/Images/Sertifikat-Atmos.png",
+    certificateNumber: "011/SF/ATMOS/VII/2026",
+  },
 ];
