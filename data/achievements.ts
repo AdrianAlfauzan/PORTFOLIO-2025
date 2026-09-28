@@ -83,4 +83,15 @@ export const achievements: Achievement[] = [
     imagePath: "/assets/Images/Sertifikat-Atmos.png",
     certificateNumber: "011/SF/ATMOS/VII/2026",
   },
+  {
+    id: "ta-webprog",
+    title: "Web Programming Teaching Assistant",
+    organization: "Universitas Jenderal Achmad Yani",
+    date: "Februari 2025 - Juli 2025",
+    role: "Teaching Assistant",
+    description:
+      "Memfasilitasi 10 sesi praktikum Web Programming (150 menit/sesi) untuk mahasiswa S1 Informatika. Mengajarkan HTML5, CSS3, Bootstrap 4, JavaScript, DOM Manipulation, jQuery, PHP, serta penanganan form GET & POST. Melakukan debugging, code review, dan penilaian tugas mingguan, kuis, serta Ujian Praktikum Akhir.",
+    imagePath: "/assets/Images/SertifTA-Webprog.png",
+    certificateNumber: "-",
+  },
 ];

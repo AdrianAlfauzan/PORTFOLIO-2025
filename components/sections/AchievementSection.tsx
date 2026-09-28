@@ -18,9 +18,12 @@ export default function AchievementSection() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const achievementIcons = [Trophy, Award, Star, Target, Medal, Flame];
+  const [imageError, setImageError] = useState(false);
 
+  const hasValidImage = selectedAchievement?.imagePath && selectedAchievement.imagePath.trim() !== "" && !imageError;
   const handleCardClick = (achievement: Achievement) => {
     setSelectedAchievement(achievement);
+    setImageError(false);
     setIsModalOpen(true);
   };
 
@@ -118,15 +121,43 @@ export default function AchievementSection() {
       </div>
 
       {/* Modal untuk menampilkan sertifikat */}
-      <Modal isOpen={isModalOpen} onClose={closeModal} title={selectedAchievement?.title} subtitle={selectedAchievement?.organization} size="lg">
+      <Modal isOpen={isModalOpen} onClose={closeModal} title={hasValidImage ? selectedAchievement?.title : undefined} subtitle={hasValidImage ? selectedAchievement?.organization : undefined} size="lg">
         {selectedAchievement && (
           <div className="space-y-6">
-            {/* Certificate Image */}
-            <div className="relative w-full rounded-xl overflow-hidden border border-white/10 bg-black/30">
-              <div className="relative w-full aspect-[3/4] md:aspect-[4/3]">
-                <Image src={selectedAchievement.imagePath} alt={selectedAchievement.title} fill className="object-contain" sizes="(max-width: 768px) 100vw, 800px" loading="lazy" />
+            {/* ====== JIKA ADA GAMBAR ====== */}
+            {hasValidImage ? (
+              <div className="relative w-full rounded-xl overflow-hidden border border-white/10 bg-black/30">
+                <div className="relative w-full aspect-[3/4] md:aspect-[4/3]">
+                  <Image src={selectedAchievement.imagePath} alt={selectedAchievement.title} fill className="object-contain" sizes="(max-width: 768px) 100vw, 800px" loading="lazy" onError={() => setImageError(true)} />
+                </div>
               </div>
-            </div>
+            ) : (
+              /* ====== JIKA TIDAK ADA GAMBAR → TITLE DI TENGAH ====== */
+              <div className="relative flex flex-col items-center justify-center text-center min-h-[220px] md:min-h-[260px] rounded-xl border border-white/10 bg-gradient-to-br from-zinc-900/70 to-black/60 px-6 py-10">
+                {/* Glow */}
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#1DB954]/8 to-transparent pointer-events-none" />
+
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#1DB954]/20 to-transparent border border-[#1DB954]/25 flex items-center justify-center mb-5">
+                    <Trophy size={28} className="text-[#1DB954]" strokeWidth={2} />
+                  </div>
+
+                  <h3 className="text-white font-bold text-xl md:text-2xl leading-snug max-w-md">{selectedAchievement.title}</h3>
+
+                  <p className="text-emerald-400/90 text-sm md:text-base mt-3 flex items-center gap-2 justify-center">
+                    <Building2 size={14} />
+                    {selectedAchievement.organization}
+                  </p>
+
+                  <span className="text-xs text-zinc-500 flex items-center gap-1 mt-2">
+                    <Calendar size={12} />
+                    {selectedAchievement.date}
+                  </span>
+
+                  <p className="text-zinc-500 text-xs mt-5 italic">Certificate image not available</p>
+                </div>
+              </div>
+            )}
 
             {/* Certificate Info */}
             <div className="space-y-4">

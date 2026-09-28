@@ -1,4 +1,5 @@
 "use client";
+import dynamic from "next/dynamic";
 
 // Components
 import HeroSection from "@/components/sections/HeroSection";
@@ -11,9 +12,13 @@ import MonthlyRecapSection from "@/components/sections/MonthlyRecapSection";
 import AchievementSection from "@/components/sections/AchievementSection";
 import WelcomeModal from "@/components/WelcomeModal";
 import AnnouncementAlert from "@/components/AnnouncementAlert";
-import BackgroundScene from "@/components/3d/BackgroundScene";
+// import BackgroundScene from "@/components/3d/BackgroundScene";
 import SideProjectsSection from "@/components/sections/SideProjectsSection";
 import TestAppSection from "@/components/sections/TestAppSection";
+
+// 3D Background — lazy load biar Three.js (~150KB) nggak block initial render
+const BackgroundScene = dynamic(() => import("@/components/3d/BackgroundScene"), { ssr: false, loading: () => null });
+
 export default function Home() {
   return (
     <main className="relative overflow-x-hidden">
